@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-30 06:21:33",
+  "updatedAt": "2026-10-30 06:34:55",
   "totalCount": 28,
   "stocks": [
     {
@@ -8,7 +8,7 @@
       "name": "KTE",
       "isSpac": false,
       "reportTitle": "KTE 공모주 정보",
-      "price": 12000,
+      "price": 9000,
       "priceLow": 19000,
       "priceHigh": 23000,
       "bandStatus": "확정",
@@ -20,10 +20,10 @@
       "underwriter": "미확인",
       "subStartDate": "2026-12-14",
       "subEndDate": "2026-12-15",
-      "listingDate": "2026-10-87",
+      "listingDate": "2026-12-25",
       "score": 82,
       "grade": "STRONG_BUY",
-      "summaryReview": "38커뮤니케이션 정밀 수집 데이터"
+      "summaryReview": "38커뮤니케이션 청약/상장 통합 수집 데이터"
     },
     {
       "id": "ipo-2",
@@ -31,10 +31,10 @@
       "name": "데스틴파워",
       "isSpac": false,
       "reportTitle": "데스틴파워 공모주 정보",
-      "price": 11000,
+      "price": 0,
       "priceLow": 8000,
       "priceHigh": 11000,
-      "bandStatus": "확정(상단)",
+      "bandStatus": "미정",
       "institutionalRatio": 0.0,
       "generalRatio": 0.0,
       "lockupRatio": 0.0,
@@ -43,10 +43,10 @@
       "underwriter": "미확인",
       "subStartDate": "2026-12-14",
       "subEndDate": "2026-12-15",
-      "listingDate": "2026-12-15",
+      "listingDate": "2026-12-25",
       "score": 82,
       "grade": "STRONG_BUY",
-      "summaryReview": "38커뮤니케이션 정밀 수집 데이터"
+      "summaryReview": "38커뮤니케이션 청약/상장 통합 수집 데이터"
     },
     {
       "id": "ipo-3",
@@ -54,10 +54,10 @@
       "name": "씨아이에스케미칼",
       "isSpac": false,
       "reportTitle": "씨아이에스케미칼 공모주 정보",
-      "price": 6800,
+      "price": 0,
       "priceLow": 5400,
       "priceHigh": 6800,
-      "bandStatus": "확정(상단)",
+      "bandStatus": "미정",
       "institutionalRatio": 0.0,
       "generalRatio": 0.0,
       "lockupRatio": 0.0,
@@ -66,10 +66,10 @@
       "underwriter": "미확인",
       "subStartDate": "2026-12-10",
       "subEndDate": "2026-12-11",
-      "listingDate": "2026-12-11",
+      "listingDate": "2026-12-21",
       "score": 82,
       "grade": "STRONG_BUY",
-      "summaryReview": "38커뮤니케이션 정밀 수집 데이터"
+      "summaryReview": "38커뮤니케이션 청약/상장 통합 수집 데이터"
     },
     {
       "id": "ipo-4",
@@ -77,10 +77,10 @@
       "name": "인터엑스",
       "isSpac": false,
       "reportTitle": "인터엑스 공모주 정보",
-      "price": 13000,
+      "price": 0,
       "priceLow": 10000,
       "priceHigh": 13000,
-      "bandStatus": "확정(상단)",
+      "bandStatus": "미정",
       "institutionalRatio": 0.0,
       "generalRatio": 0.0,
       "lockupRatio": 0.0,
@@ -89,10 +89,10 @@
       "underwriter": "미확인",
       "subStartDate": "2026-12-09",
       "subEndDate": "2026-12-10",
-      "listingDate": "2026-12-10",
+      "listingDate": "2026-12-18",
       "score": 82,
       "grade": "STRONG_BUY",
-      "summaryReview": "38커뮤니케이션 정밀 수집 데이터"
+      "summaryReview": "38커뮤니케이션 청약/상장 통합 수집 데이터"
     },
     {
       "id": "ipo-5",
@@ -100,10 +100,10 @@
       "name": "이노보테라퓨틱스",
       "isSpac": false,
       "reportTitle": "이노보테라퓨틱스 공모주 정보",
-      "price": 24000,
+      "price": 0,
       "priceLow": 20000,
       "priceHigh": 24000,
-      "bandStatus": "확정(상단)",
+      "bandStatus": "미정",
       "institutionalRatio": 0.0,
       "generalRatio": 0.0,
       "lockupRatio": 0.0,
@@ -112,10 +112,10 @@
       "underwriter": "미확인",
       "subStartDate": "2026-12-07",
       "subEndDate": "2026-12-08",
-      "listingDate": "2026-12-08",
+      "listingDate": "2026-12-18",
       "score": 82,
       "grade": "STRONG_BUY",
-      "summaryReview": "38커뮤니케이션 정밀 수집 데이터"
+      "summaryReview": "38커뮤니케이션 청약/상장 통합 수집 데이터"
     },
     {
       "id": "ipo-6",
@@ -123,10 +123,10 @@
       "name": "엔키화이트햇",
       "isSpac": false,
       "reportTitle": "엔키화이트햇 공모주 정보",
-      "price": 16500,
+      "price": 0,
       "priceLow": 13000,
       "priceHigh": 16500,
-      "bandStatus": "확정(상단)",
+      "bandStatus": "미정",
       "institutionalRatio": 0.0,
       "generalRatio": 0.0,
       "lockupRatio": 0.0,
@@ -135,10 +135,10 @@
       "underwriter": "미확인",
       "subStartDate": "2026-12-01",
       "subEndDate": "2026-12-02",
-      "listingDate": "2026-12-02",
+      "listingDate": "2026-12-11",
       "score": 82,
       "grade": "STRONG_BUY",
-      "summaryReview": "38커뮤니케이션 정밀 수집 데이터"
+      "summaryReview": "38커뮤니케이션 청약/상장 통합 수집 데이터"
     },
     {
       "id": "ipo-7",
@@ -146,10 +146,10 @@
       "name": "에이엔에이치스트럭쳐",
       "isSpac": false,
       "reportTitle": "에이엔에이치스트럭쳐 공모주 정보",
-      "price": 13600,
+      "price": 0,
       "priceLow": 11200,
       "priceHigh": 13600,
-      "bandStatus": "확정(상단)",
+      "bandStatus": "미정",
       "institutionalRatio": 0.0,
       "generalRatio": 0.0,
       "lockupRatio": 0.0,
@@ -158,10 +158,10 @@
       "underwriter": "미확인",
       "subStartDate": "2026-11-27",
       "subEndDate": "2026-11-30",
-      "listingDate": "2026-11-30",
+      "listingDate": "2026-12-10",
       "score": 82,
       "grade": "STRONG_BUY",
-      "summaryReview": "38커뮤니케이션 정밀 수집 데이터"
+      "summaryReview": "38커뮤니케이션 청약/상장 통합 수집 데이터"
     },
     {
       "id": "ipo-8",
@@ -169,10 +169,10 @@
       "name": "제논",
       "isSpac": false,
       "reportTitle": "제논 공모주 정보",
-      "price": 12200,
+      "price": 0,
       "priceLow": 9700,
       "priceHigh": 12200,
-      "bandStatus": "확정(상단)",
+      "bandStatus": "미정",
       "institutionalRatio": 0.0,
       "generalRatio": 0.0,
       "lockupRatio": 0.0,
@@ -181,10 +181,10 @@
       "underwriter": "미확인",
       "subStartDate": "2026-11-24",
       "subEndDate": "2026-11-25",
-      "listingDate": "2026-11-25",
+      "listingDate": "2026-12-04",
       "score": 82,
       "grade": "STRONG_BUY",
-      "summaryReview": "38커뮤니케이션 정밀 수집 데이터"
+      "summaryReview": "38커뮤니케이션 청약/상장 통합 수집 데이터"
     },
     {
       "id": "ipo-9",
@@ -192,10 +192,10 @@
       "name": "케이엠에프",
       "isSpac": false,
       "reportTitle": "케이엠에프 공모주 정보",
-      "price": 17800,
+      "price": 0,
       "priceLow": 15000,
       "priceHigh": 17800,
-      "bandStatus": "확정(상단)",
+      "bandStatus": "미정",
       "institutionalRatio": 0.0,
       "generalRatio": 0.0,
       "lockupRatio": 0.0,
@@ -204,10 +204,10 @@
       "underwriter": "미확인",
       "subStartDate": "2026-11-24",
       "subEndDate": "2026-11-25",
-      "listingDate": "2026-11-25",
+      "listingDate": "2026-12-04",
       "score": 82,
       "grade": "STRONG_BUY",
-      "summaryReview": "38커뮤니케이션 정밀 수집 데이터"
+      "summaryReview": "38커뮤니케이션 청약/상장 통합 수집 데이터"
     },
     {
       "id": "ipo-10",
@@ -215,10 +215,10 @@
       "name": "아델",
       "isSpac": false,
       "reportTitle": "아델 공모주 정보",
-      "price": 25000,
+      "price": 0,
       "priceLow": 18000,
       "priceHigh": 25000,
-      "bandStatus": "확정(상단)",
+      "bandStatus": "미정",
       "institutionalRatio": 0.0,
       "generalRatio": 0.0,
       "lockupRatio": 0.0,
@@ -227,10 +227,10 @@
       "underwriter": "미확인",
       "subStartDate": "2026-11-23",
       "subEndDate": "2026-11-24",
-      "listingDate": "2026-11-24",
+      "listingDate": "2026-12-04",
       "score": 82,
       "grade": "STRONG_BUY",
-      "summaryReview": "38커뮤니케이션 정밀 수집 데이터"
+      "summaryReview": "38커뮤니케이션 청약/상장 통합 수집 데이터"
     },
     {
       "id": "ipo-11",
@@ -238,10 +238,10 @@
       "name": "에스에프씨",
       "isSpac": false,
       "reportTitle": "에스에프씨 공모주 정보",
-      "price": 36100,
+      "price": 0,
       "priceLow": 31600,
       "priceHigh": 36100,
-      "bandStatus": "확정(상단)",
+      "bandStatus": "미정",
       "institutionalRatio": 0.0,
       "generalRatio": 0.0,
       "lockupRatio": 0.0,
@@ -250,10 +250,10 @@
       "underwriter": "미확인",
       "subStartDate": "2026-11-18",
       "subEndDate": "2026-11-19",
-      "listingDate": "2026-11-19",
+      "listingDate": "2026-11-27",
       "score": 82,
       "grade": "STRONG_BUY",
-      "summaryReview": "38커뮤니케이션 정밀 수집 데이터"
+      "summaryReview": "38커뮤니케이션 청약/상장 통합 수집 데이터"
     },
     {
       "id": "ipo-12",
@@ -261,10 +261,10 @@
       "name": "유캐스트",
       "isSpac": false,
       "reportTitle": "유캐스트 공모주 정보",
-      "price": 23000,
+      "price": 0,
       "priceLow": 19000,
       "priceHigh": 23000,
-      "bandStatus": "확정(상단)",
+      "bandStatus": "미정",
       "institutionalRatio": 0.0,
       "generalRatio": 0.0,
       "lockupRatio": 0.0,
@@ -273,10 +273,10 @@
       "underwriter": "미확인",
       "subStartDate": "2026-11-18",
       "subEndDate": "2026-11-19",
-      "listingDate": "2026-11-19",
+      "listingDate": "2026-11-27",
       "score": 82,
       "grade": "STRONG_BUY",
-      "summaryReview": "38커뮤니케이션 정밀 수집 데이터"
+      "summaryReview": "38커뮤니케이션 청약/상장 통합 수집 데이터"
     },
     {
       "id": "ipo-13",
@@ -284,10 +284,10 @@
       "name": "엠비디",
       "isSpac": false,
       "reportTitle": "엠비디 공모주 정보",
-      "price": 11700,
+      "price": 0,
       "priceLow": 9600,
       "priceHigh": 11700,
-      "bandStatus": "확정(상단)",
+      "bandStatus": "미정",
       "institutionalRatio": 0.0,
       "generalRatio": 0.0,
       "lockupRatio": 0.0,
@@ -296,10 +296,10 @@
       "underwriter": "미확인",
       "subStartDate": "2026-11-12",
       "subEndDate": "2026-11-13",
-      "listingDate": "2026-11-13",
+      "listingDate": "2026-11-23",
       "score": 82,
       "grade": "STRONG_BUY",
-      "summaryReview": "38커뮤니케이션 정밀 수집 데이터"
+      "summaryReview": "38커뮤니케이션 청약/상장 통합 수집 데이터"
     },
     {
       "id": "ipo-14",
@@ -307,10 +307,10 @@
       "name": "씨앤엠",
       "isSpac": false,
       "reportTitle": "씨앤엠 공모주 정보",
-      "price": 13000,
+      "price": 0,
       "priceLow": 10000,
       "priceHigh": 13000,
-      "bandStatus": "확정(상단)",
+      "bandStatus": "미정",
       "institutionalRatio": 0.0,
       "generalRatio": 0.0,
       "lockupRatio": 0.0,
@@ -319,10 +319,10 @@
       "underwriter": "미확인",
       "subStartDate": "2026-11-12",
       "subEndDate": "2026-11-13",
-      "listingDate": "2026-11-13",
+      "listingDate": "2026-11-23",
       "score": 82,
       "grade": "STRONG_BUY",
-      "summaryReview": "38커뮤니케이션 정밀 수집 데이터"
+      "summaryReview": "38커뮤니케이션 청약/상장 통합 수집 데이터"
     },
     {
       "id": "ipo-15",
@@ -330,10 +330,10 @@
       "name": "제이앤티지",
       "isSpac": false,
       "reportTitle": "제이앤티지 공모주 정보",
-      "price": 31900,
+      "price": 0,
       "priceLow": 26400,
       "priceHigh": 31900,
-      "bandStatus": "확정(상단)",
+      "bandStatus": "미정",
       "institutionalRatio": 0.0,
       "generalRatio": 0.0,
       "lockupRatio": 0.0,
@@ -342,10 +342,10 @@
       "underwriter": "미확인",
       "subStartDate": "2026-11-12",
       "subEndDate": "2026-11-13",
-      "listingDate": "2026-11-13",
+      "listingDate": "2026-11-23",
       "score": 82,
       "grade": "STRONG_BUY",
-      "summaryReview": "38커뮤니케이션 정밀 수집 데이터"
+      "summaryReview": "38커뮤니케이션 청약/상장 통합 수집 데이터"
     },
     {
       "id": "ipo-16",
@@ -353,10 +353,10 @@
       "name": "하나에어로다이내믹스",
       "isSpac": false,
       "reportTitle": "하나에어로다이내믹스 공모주 정보",
-      "price": 5700,
+      "price": 0,
       "priceLow": 4700,
       "priceHigh": 5700,
-      "bandStatus": "확정(상단)",
+      "bandStatus": "미정",
       "institutionalRatio": 0.0,
       "generalRatio": 0.0,
       "lockupRatio": 0.0,
@@ -365,10 +365,10 @@
       "underwriter": "미확인",
       "subStartDate": "2026-11-10",
       "subEndDate": "2026-11-11",
-      "listingDate": "2026-11-11",
+      "listingDate": "2026-11-20",
       "score": 82,
       "grade": "STRONG_BUY",
-      "summaryReview": "38커뮤니케이션 정밀 수집 데이터"
+      "summaryReview": "38커뮤니케이션 청약/상장 통합 수집 데이터"
     },
     {
       "id": "ipo-17",
@@ -376,10 +376,10 @@
       "name": "다비오",
       "isSpac": false,
       "reportTitle": "다비오 공모주 정보",
-      "price": 16600,
+      "price": 0,
       "priceLow": 12300,
       "priceHigh": 16600,
-      "bandStatus": "확정(상단)",
+      "bandStatus": "미정",
       "institutionalRatio": 0.0,
       "generalRatio": 0.0,
       "lockupRatio": 0.0,
@@ -388,10 +388,10 @@
       "underwriter": "미확인",
       "subStartDate": "2026-11-10",
       "subEndDate": "2026-11-11",
-      "listingDate": "2026-11-11",
+      "listingDate": "2026-11-20",
       "score": 82,
       "grade": "STRONG_BUY",
-      "summaryReview": "38커뮤니케이션 정밀 수집 데이터"
+      "summaryReview": "38커뮤니케이션 청약/상장 통합 수집 데이터"
     },
     {
       "id": "ipo-18",
@@ -399,10 +399,10 @@
       "name": "에이엘로봇",
       "isSpac": false,
       "reportTitle": "에이엘로봇 공모주 정보",
-      "price": 17600,
+      "price": 0,
       "priceLow": 15700,
       "priceHigh": 17600,
-      "bandStatus": "확정(상단)",
+      "bandStatus": "미정",
       "institutionalRatio": 0.0,
       "generalRatio": 0.0,
       "lockupRatio": 0.0,
@@ -411,10 +411,10 @@
       "underwriter": "미확인",
       "subStartDate": "2026-11-06",
       "subEndDate": "2026-11-09",
-      "listingDate": "2026-11-09",
+      "listingDate": "2026-11-19",
       "score": 82,
       "grade": "STRONG_BUY",
-      "summaryReview": "38커뮤니케이션 정밀 수집 데이터"
+      "summaryReview": "38커뮤니케이션 청약/상장 통합 수집 데이터"
     },
     {
       "id": "ipo-19",
@@ -434,10 +434,10 @@
       "underwriter": "미확인",
       "subStartDate": "2026-11-05",
       "subEndDate": "2026-11-06",
-      "listingDate": "2026-11-06",
+      "listingDate": "2026-11-16",
       "score": 82,
       "grade": "STRONG_BUY",
-      "summaryReview": "38커뮤니케이션 정밀 수집 데이터"
+      "summaryReview": "38커뮤니케이션 청약/상장 통합 수집 데이터"
     },
     {
       "id": "ipo-20",
@@ -445,10 +445,10 @@
       "name": "영광와이케이엠씨",
       "isSpac": false,
       "reportTitle": "영광와이케이엠씨 공모주 정보",
-      "price": 11000,
+      "price": 0,
       "priceLow": 9400,
       "priceHigh": 11000,
-      "bandStatus": "확정(상단)",
+      "bandStatus": "미정",
       "institutionalRatio": 1000.07,
       "generalRatio": 0.0,
       "lockupRatio": 0.87,
@@ -457,10 +457,10 @@
       "underwriter": "미확인",
       "subStartDate": "2026-11-04",
       "subEndDate": "2026-11-05",
-      "listingDate": "2026-11-05",
+      "listingDate": "2026-11-13",
       "score": 82,
       "grade": "STRONG_BUY",
-      "summaryReview": "38커뮤니케이션 정밀 수집 데이터"
+      "summaryReview": "38커뮤니케이션 청약/상장 통합 수집 데이터"
     },
     {
       "id": "ipo-21",
@@ -468,10 +468,10 @@
       "name": "넥스아이",
       "isSpac": false,
       "reportTitle": "넥스아이 공모주 정보",
-      "price": 13000,
+      "price": 0,
       "priceLow": 10500,
       "priceHigh": 13000,
-      "bandStatus": "확정(상단)",
+      "bandStatus": "미정",
       "institutionalRatio": 0.0,
       "generalRatio": 0.0,
       "lockupRatio": 0.0,
@@ -480,10 +480,10 @@
       "underwriter": "미확인",
       "subStartDate": "2026-11-03",
       "subEndDate": "2026-11-04",
-      "listingDate": "2026-11-04",
+      "listingDate": "2026-11-13",
       "score": 82,
       "grade": "STRONG_BUY",
-      "summaryReview": "38커뮤니케이션 정밀 수집 데이터"
+      "summaryReview": "38커뮤니케이션 청약/상장 통합 수집 데이터"
     },
     {
       "id": "ipo-22",
@@ -491,10 +491,10 @@
       "name": "바로팜",
       "isSpac": false,
       "reportTitle": "바로팜 공모주 정보",
-      "price": 20200,
+      "price": 0,
       "priceLow": 16400,
       "priceHigh": 20200,
-      "bandStatus": "확정(상단)",
+      "bandStatus": "미정",
       "institutionalRatio": 0.0,
       "generalRatio": 0.0,
       "lockupRatio": 0.0,
@@ -503,10 +503,10 @@
       "underwriter": "미확인",
       "subStartDate": "2026-11-02",
       "subEndDate": "2026-11-03",
-      "listingDate": "2026-11-03",
+      "listingDate": "2026-11-13",
       "score": 82,
       "grade": "STRONG_BUY",
-      "summaryReview": "38커뮤니케이션 정밀 수집 데이터"
+      "summaryReview": "38커뮤니케이션 청약/상장 통합 수집 데이터"
     },
     {
       "id": "ipo-23",
@@ -526,10 +526,10 @@
       "underwriter": "미확인",
       "subStartDate": "2026-11-02",
       "subEndDate": "2026-11-03",
-      "listingDate": "2026-11-03",
+      "listingDate": "2026-11-13",
       "score": 82,
       "grade": "STRONG_BUY",
-      "summaryReview": "38커뮤니케이션 정밀 수집 데이터"
+      "summaryReview": "38커뮤니케이션 청약/상장 통합 수집 데이터"
     },
     {
       "id": "ipo-24",
@@ -537,10 +537,10 @@
       "name": "아이엠증권",
       "isSpac": false,
       "reportTitle": "아이엠증권 공모주 정보",
-      "price": 2000,
+      "price": 0,
       "priceLow": 2000,
       "priceHigh": 2000,
-      "bandStatus": "확정(상단)",
+      "bandStatus": "미정",
       "institutionalRatio": 1112.73,
       "generalRatio": 0.0,
       "lockupRatio": 0.0,
@@ -549,10 +549,10 @@
       "underwriter": "미확인",
       "subStartDate": "2026-10-26",
       "subEndDate": "2026-10-27",
-      "listingDate": "2026-12-73",
+      "listingDate": "2026-11-06",
       "score": 82,
       "grade": "STRONG_BUY",
-      "summaryReview": "38커뮤니케이션 정밀 수집 데이터"
+      "summaryReview": "38커뮤니케이션 청약/상장 통합 수집 데이터"
     },
     {
       "id": "ipo-25",
@@ -572,10 +572,10 @@
       "underwriter": "미확인",
       "subStartDate": "2026-10-22",
       "subEndDate": "2026-10-23",
-      "listingDate": "2026-03-55",
+      "listingDate": "2026-11-02",
       "score": 82,
       "grade": "STRONG_BUY",
-      "summaryReview": "38커뮤니케이션 정밀 수집 데이터"
+      "summaryReview": "38커뮤니케이션 청약/상장 통합 수집 데이터"
     },
     {
       "id": "ipo-26",
@@ -595,10 +595,10 @@
       "underwriter": "미확인",
       "subStartDate": "2026-10-22",
       "subEndDate": "2026-10-23",
-      "listingDate": "2026-28-95",
+      "listingDate": "2026-11-02",
       "score": 82,
       "grade": "STRONG_BUY",
-      "summaryReview": "38커뮤니케이션 정밀 수집 데이터"
+      "summaryReview": "38커뮤니케이션 청약/상장 통합 수집 데이터"
     },
     {
       "id": "ipo-27",
@@ -618,10 +618,10 @@
       "underwriter": "미확인",
       "subStartDate": "2026-10-22",
       "subEndDate": "2026-10-23",
-      "listingDate": "2026-84-73",
+      "listingDate": "2026-11-02",
       "score": 82,
       "grade": "STRONG_BUY",
-      "summaryReview": "38커뮤니케이션 정밀 수집 데이터"
+      "summaryReview": "38커뮤니케이션 청약/상장 통합 수집 데이터"
     },
     {
       "id": "ipo-28",
@@ -635,16 +635,16 @@
       "bandStatus": "확정",
       "institutionalRatio": 1410.87,
       "generalRatio": 0.0,
-      "lockupRatio": 0.0,
+      "lockupRatio": 6.14,
       "floatAmountBillion": 350.0,
       "existingShareholderRatio": 20.0,
       "underwriter": "미확인",
       "subStartDate": "2026-10-21",
       "subEndDate": "2026-10-22",
-      "listingDate": "2026-10-87",
+      "listingDate": "2026-10-30",
       "score": 82,
       "grade": "STRONG_BUY",
-      "summaryReview": "38커뮤니케이션 정밀 수집 데이터"
+      "summaryReview": "38커뮤니케이션 청약/상장 통합 수집 데이터"
     }
   ]
 }
