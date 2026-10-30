@@ -20,11 +20,10 @@ jobs:
       - name: Install dependencies
         run: pip install requests
 
-      - name: Run Crawler
+      - name: Run collector
         env:
           DART_API_KEY: ${{ secrets.DART_API_KEY }} # GitHub Secrets에 등록한 키를 안전하게 주입
-        run: python ipo_dart_crawler.py
-
+        run: python collector.py
       - name: Commit and push ipo_data.json
         run: |
           git config --global user.name "github-actions[bot]"
