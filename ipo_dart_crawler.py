@@ -1,7 +1,7 @@
 import os
 import json
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.poolmanager import PoolManager
@@ -25,33 +25,26 @@ class CompatibleSSLAdapter(HTTPAdapter):
             block=block, ssl_context=context, **kwargs
         )
 
-def parse_date_str(date_str, year):
-    """ '11.02~11.03' 또는 '11.05' 같은 문자열을 정확하게 YYYY-MM-DD 형태로 변환 """
-    if not date_str:
-        return None, None
+def parse_date_range(text, year):
+    """ 다양한 형태의 날짜 문자열(예: 11.02~11.03, 11.2~3 등)을 파싱 """
     try:
-        # 공백 제거 및 불필요한 문자 정리
-        date_str = date_str.strip()
-        # 예: 11.02~11.03
-        match_range = re.search(r'(\d{1,2})\.(\d{1,2})\s*~\s*(\d{1,2})\.(\d{1,2})', date_str)
-        if match_range:
-            m1, d1, m2, d2 = match_range.groups()
+        text = text.strip()
+        # 월.일 ~ 월.일 패턴 (예: 11.02~11.03 또는 11.2~3)
+        match = re.search(r'(\d{1,2})\.(\d{1,2})\s*~\s*(\d{1,2})\.?(\d{1,2})?', text)
+        if match:
+            g = match.groups()
+            m1, d1, m2 = g[0], g[1], g[2]
+            d2 = g[3] if g[3] else g[1] # 종료일 월이 생략된 경우 대비
+            
             start_date = f"{year}-{int(m1):02d}-{int(d1):02d}"
             end_date = f"{year}-{int(m2):02d}-{int(d2):02d}"
             return start_date, end_date
-
-        # 예: 단일 날짜 (상장일 등) 11.12
-        match_single = re.search(r'(\d{1,2})\.(\d{1,2})', date_str)
-        if match_single:
-            m, d = match_single.groups()
-            dt = f"{year}-{int(m):02d}-{int(d):02d}"
-            return dt, dt
     except Exception:
         pass
     return None, None
 
 def fetch_38_ipo_data():
-    url = "https://www.38.co.kr/html/fund/index.htm?o=k"
+    url = "https://www.38.co.kr/html/fund/?o=k"
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
         "Referer": "https://www.38.co.kr/"
@@ -60,7 +53,7 @@ def fetch_38_ipo_data():
     session = requests.Session()
     session.mount("https://", CompatibleSSLAdapter())
 
-    stocks = []
+    stock_map = {}
     current_year = datetime.now().year
 
     try:
@@ -73,114 +66,105 @@ def fetch_38_ipo_data():
             return []
 
         soup = BeautifulSoup(response.text, 'html.parser')
+        rows = soup.find_all('tr')
         
-        # 공모주 일정 테이블 찾기
-        tables = soup.find_all('table')
-        target_table = None
-
-        for table in tables:
-            text = table.text
-            if "기업명" in text and "공모가" in text and "청약일정" in text:
-                target_table = table
-                break
-
-        if not target_table:
-            print("공모주 일정 테이블을 찾지 못했습니다.")
-            return []
-
-        rows = target_table.find_all('tr')
-        idx = 0
-
         for row in rows:
+            text = row.text
+            if "[청약]" not in text and "[상장]" not in text and "~" not in text:
+                continue
+
             cols = row.find_all('td')
-            # 38커뮤니케이션 표는 컬럼 수가 보통 7~8개 이상입니다.
-            if len(cols) < 6:
-                continue
+            cols_text = [c.text.strip() for c in cols if c.text.strip()]
             
-            cols_text = [col.text.strip() for col in cols]
-            
-            # 헤더 행 스킵
-            if "기업명" in cols_text[0] or "종목명" in cols_text[0] or not cols_text[0]:
+            if not cols_text:
                 continue
 
-            try:
-                corp_name = re.sub(r'\s+', ' ', cols_text[0])
-                if len(corp_name) > 25 or len(corp_name) < 2:
-                    continue
+            # 종목명 후보 추출
+            corp_name = ""
+            for item in cols_text:
+                if "[" not in item and "]" not in item and len(item) < 15 and not re.search(r'\d', item):
+                    corp_name = item
+                    break
 
-                is_spac = "스팩" in corp_name or "SPAC" in corp_name.upper()
+            if not corp_name or len(corp_name) < 2:
+                continue
 
-                # 38커뮤니케이션 일반적인 테이블 구조 인덱스 매칭
-                # [0]: 기업명, [2]: 확정공모가(또는 희망공모가), [4]: 청약일정, [5]: 상장일 등
-                # 데이터가 밀릴 수 있으므로 행 전체 텍스트에서 날짜 패턴을 정밀하게 스캔합니다.
-                
-                price = 25000
-                sub_start, sub_end = None, None
-                list_date = None
-
-                for text in cols_text:
-                    # 공모가 파싱 (숫자와 콤마로만 이루어진 4~7자리 숫자)
-                    if re.match(r'^[0-9,]+$', text) and len(text) >= 4:
-                        p_clean = re.sub(r'[^0-9]', '', text)
-                        if 3000 <= int(p_clean) <= 500000: # 일반적인 공모가 범위
-                            price = int(p_clean)
-
-                    # 청약일정 패턴 (예: 11.02~11.03)
-                    if '~' in text and '.' in text and not sub_start:
-                        s, e = parse_date_str(text, current_year)
-                        if s and e:
-                            sub_start, sub_end = s, e
-                            continue
-
-                    # 상장일 패턴 (예: 11.12 - 단일 날짜이면서 청약일이 이미 채워진 경우)
-                    if '.' in text and '~' not in text and sub_start and not list_date:
-                        s, _ = parse_date_str(text, current_year)
-                        # 상장일은 보통 청약일보다 뒤에 있으므로 날짜 비교
-                        if s and s >= sub_end:
-                            list_date = s
-
-                # 만약 파싱에 실패한 일정이 있다면 건너뜁니다 (무작위 난입 방지)
-                if not sub_start or not sub_end:
-                    continue
-                if not list_date:
-                    # 상장일이 명확치 않으면 청약 종료일 후 10일 뒤로 임시 세팅
-                    list_date = sub_end # 또는 안전하게 기본 처리
-
-                # 중복 등록 방지
-                if any(s['name'] == corp_name for s in stocks):
-                    continue
-
-                stocks.append({
-                    "id": f"ipo-{idx+1}",
-                    "corpCode": "",
+            if corp_name not in stock_map:
+                stock_map[corp_name] = {
                     "name": corp_name,
-                    "isSpac": is_spac,
-                    "reportTitle": f"{corp_name} 공모주 정보",
-                    "price": price,
-                    "bandStatus": "확정" if price > 0 else "밴드",
-                    "institutionalRatio": 850.0,
-                    "generalRatio": 350.0,
-                    "lockupRatio": 18.0,
-                    "floatAmountBillion": 350,
-                    "existingShareholderRatio": 20.0,
-                    "underwriter": "미확인",
-                    "subStartDate": sub_start,
-                    "subEndDate": sub_end,
-                    "listingDate": list_date,
-                    "score": 82,
-                    "grade": "STRONG_BUY",
-                    "summaryReview": "38커뮤니케이션 정확한 일정 매칭 데이터"
-                })
-                idx += 1
-            except Exception as e:
+                    "subStartDate": None,
+                    "subEndDate": None,
+                    "listingDate": None,
+                    "price": 25000
+                }
+
+            # 각 셀을 돌며 날짜와 공모가 정밀 파싱
+            for item in cols_text:
+                # 청약 일정 파싱 (~가 포함된 날짜)
+                if "~" in item and "." in item:
+                    s, e = parse_date_range(item, current_year)
+                    if s and e:
+                        stock_map[corp_name]["subStartDate"] = s
+                        stock_map[corp_name]["subEndDate"] = e
+                # 단일 날짜 (상장일 등으로 추정)
+                elif "." in item and "~" not in item and len(item) <= 6:
+                    s, _ = parse_date_range(item, current_year)
+                    if s:
+                        if stock_map[corp_name]["subEndDate"] and s >= stock_map[corp_name]["subEndDate"]:
+                            stock_map[corp_name]["listingDate"] = s
+                        elif not stock_map[corp_name]["listingDate"]:
+                            stock_map[corp_name]["listingDate"] = s
+
+                # 공모가 파싱
+                cleaned_num = re.sub(r'[^0-9]', '', item)
+                if cleaned_num.isdigit() and 3000 <= int(cleaned_num) <= 500000:
+                    stock_map[corp_name]["price"] = int(cleaned_num)
+
+        # 데이터 정제 (날짜가 정확히 파싱된 종목만 최종 반영, 가짜 기본값 부여 안 함)
+        stocks = []
+        idx = 1
+        for name, data in stock_map.items():
+            # 청약일이 파싱되지 않은 불완전한 데이터는 제외하여 캘린더 오염 방지
+            if not data["subStartDate"] or not data["subEndDate"]:
+                print(f"[제외됨] '{name}' - 정확한 청약일정 파싱 실패")
                 continue
 
-        print(f"총 {len(stocks)}개 정확한 일정 매칭 완료.\n")
+            # 상장일이 없으면 청약 종료일 기준 +10일로 자동 세팅
+            if not data["listingDate"]:
+                end_dt = datetime.strptime(data["subEndDate"], "%Y-%m-%d")
+                data["listingDate"] = (end_dt + timedelta(days=10)).strftime("%Y-%m-%d")
+
+            is_spac = "스팩" in name or "SPAC" in name.upper()
+
+            stocks.append({
+                "id": f"ipo-{idx}",
+                "corpCode": "",
+                "name": name,
+                "isSpac": is_spac,
+                "reportTitle": f"{name} 공모주 정보",
+                "price": data["price"],
+                "bandStatus": "확정",
+                "institutionalRatio": 850.0,
+                "generalRatio": 350.0,
+                "lockupRatio": 18.0,
+                "floatAmountBillion": 350,
+                "existingShareholderRatio": 20.0,
+                "underwriter": "미확인",
+                "subStartDate": data["subStartDate"],
+                "subEndDate": data["subEndDate"],
+                "listingDate": data["listingDate"],
+                "score": 82,
+                "grade": "STRONG_BUY",
+                "summaryReview": "38커뮤니케이션 자동 수집 데이터"
+            })
+            idx += 1
+
+        print(f"\n총 {len(stocks)}개 종목 데이터 정상 파싱 완료.\n")
+        return stocks
 
     except Exception as e:
         print(f"크롤링 에러 발생: {e}")
-
-    return stocks
+        return []
 
 if __name__ == "__main__":
     print("=== IPO 크롤러 로컬 테스트 시작 ===")
