@@ -4,65 +4,174 @@ from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
 
-def calculate_ipo_score(inst_ratio, lockup_ratio, float_amt_billion, existing_ratio, is_spac):
-    """4대 핵심 인자 기반 공모주 점수 및 평가 산출"""
+def clean_text(text):
+    if not text:
+        return ""
+    return re.sub(r'\s+', ' ', text).strip()
+
+def parse_38_calendar():
+    """
+    38커뮤니케이션 실제 공모주 청약일정 실시간 크롤링
+    URL: https://www.38.co.kr/html/fund/index.htm?o=k
+    """
+    url = "https://www.38.co.kr/html/fund/index.htm?o=k"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+    }
+
+    stocks = []
+    current_year = datetime.now().year
+
+    try:
+        res = requests.get(url, headers=headers, timeout=10)
+        res.encoding = "euc-kr"
+        soup = BeautifulSoup(res.text, "html.parser")
+
+        # 메인 테이블 찾기
+        tables = soup.find_all("table")
+        target_table = None
+
+        for t in tables:
+            header_text = t.get_text()
+            if "종목명" in header_text and "공모주청약일" in header_text:
+                target_table = t
+                break
+
+        if not target_table:
+            print("테이블을 찾을 수 없습니다.")
+            return []
+
+        rows = target_table.find_all("tr")
+        for idx, row in enumerate(rows):
+            cols = row.find_all(["td", "th"])
+            col_texts = [clean_text(c.get_text()) for c in cols]
+
+            # 헤더 행 건너뛰기
+            if len(col_texts) < 6 or "종목명" in col_texts[0]:
+                continue
+
+            name = col_texts[0]
+            # 스팩주 여부 판별
+            is_spac = ("스팩" in name) or ("SPAC" in name.upper())
+
+            # 공모청약일 파싱 (예: "2024.10.23 ~ 10.24" 또는 "10.23 ~ 10.24")
+            date_col = col_texts[1]
+            sub_start = ""
+            sub_end = ""
+            date_matches = re.findall(r'(\d{4}\.)?(\d{1,2})\.(\d{1,2})', date_col)
+
+            if len(date_matches) >= 2:
+                # 시작일
+                s_y = date_matches[0][0].replace(".", "") if date_matches[0][0] else str(current_year)
+                s_m = date_matches[0][1].zfill(2)
+                s_d = date_matches[0][2].zfill(2)
+                sub_start = f"{s_y}-{s_m}-{s_d}"
+
+                # 마감일
+                e_y = date_matches[1][0].replace(".", "") if date_matches[1][0] else s_y
+                e_m = date_matches[1][1].zfill(2)
+                e_d = date_matches[1][2].zfill(2)
+                sub_end = f"{e_y}-{e_m}-{e_d}"
+
+            # 확정공모가 (예: "18,000")
+            price_str = re.sub(r'[^\d]', '', col_texts[2])
+            price = int(price_str) if price_str else (2000 if is_spac else 0)
+
+            # 주관사
+            underwriter = col_texts[5] if len(col_texts) > 5 else "주관사 미정"
+
+            # 기관경쟁률
+            inst_ratio = 0.0
+            if len(col_texts) > 6 and col_texts[6]:
+                ratio_match = re.search(r'([\d\.,]+)\s*:\s*1', col_texts[6])
+                if ratio_match:
+                    inst_ratio = float(ratio_match.group(1).replace(",", ""))
+
+            # 기본 지표 추정 및 스코어 계산
+            lockup_ratio = 12.5 if inst_ratio > 800 else 3.2
+            float_billion = 90 if is_spac else (450 if price < 25000 else 1100)
+            existing_ratio = 0.0 if is_spac else (22.0 if inst_ratio > 800 else 45.0)
+
+            score, grade, review = calculate_score(inst_ratio, lockup_ratio, float_billion, existing_ratio, is_spac)
+
+            # 상장일 추정 (청약 마감일 기준 약 9일~10일 뒤)
+            listing_date = ""
+            if sub_end:
+                try:
+                    end_dt = datetime.strptime(sub_end, "%Y-%m-%d")
+                    # 통상 청약 마감 8~10일 뒤 상장
+                    from datetime import timedelta
+                    listing_dt = end_dt + timedelta(days=9)
+                    # 주말일 경우 월요일로 보정
+                    if listing_dt.weekday() == 5:
+                        listing_dt += timedelta(days=2)
+                    elif listing_dt.weekday() == 6:
+                        listing_dt += timedelta(days=1)
+                    listing_date = listing_dt.strftime("%Y-%m-%d")
+                except:
+                    pass
+
+            if sub_start and sub_end:
+                stocks.append({
+                    "id": f"real-{idx}",
+                    "name": name,
+                    "isSpac": is_spac,
+                    "price": price,
+                    "bandStatus": "확정" if price > 0 else "미정",
+                    "institutionalRatio": inst_ratio,
+                    "lockupRatio": lockup_ratio,
+                    "floatAmountBillion": float_billion,
+                    "existingShareholderRatio": existing_ratio,
+                    "underwriter": underwriter,
+                    "subStartDate": sub_start,
+                    "subEndDate": sub_end,
+                    "listingDate": listing_date,
+                    "score": score,
+                    "grade": grade,
+                    "summaryReview": review
+                })
+
+    except Exception as e:
+        print(f"크롤링 오류 발생: {e}")
+
+    return stocks
+
+def calculate_score(inst_ratio, lockup_ratio, float_amt_billion, existing_ratio, is_spac):
     if is_spac:
-        if float_amt_billion <= 100:
-            return 85, "STRONG_BUY", "공모규모 100억 이하 소형 스팩으로 상장일 수급 슈팅에 유리함."
-        elif float_amt_billion <= 150:
-            return 70, "NEUTRAL", "중형 스팩으로 무난하나 수수료 공제 후 실익 계산 필요."
-        else:
-            return 50, "AVOID", "공모규모가 커 상장일 단기 시초가 급등을 기대하기 어려움."
+        return 85, "STRONG_BUY", "스팩(공모가 2,000원 고정)으로 원금 리스크가 극히 적음."
 
     score = 0
     reasons = []
 
-    # 1. 기관 경쟁률 (배점: 35점)
     if inst_ratio >= 1000:
         score += 35
-        reasons.append("기관 경쟁률 1,000:1 돌파(흥행 성공)")
-    elif inst_ratio >= 700:
+        reasons.append("기관경쟁률 1,000:1 이상 흥행")
+    elif inst_ratio >= 500:
         score += 25
-    elif inst_ratio >= 400:
+    elif inst_ratio > 0:
         score += 15
+        reasons.append("기관경쟁률 다소 저조")
     else:
-        score += 5
-        reasons.append("기관 경쟁률 400:1 미달(흥행 부진)")
+        score += 10
+        reasons.append("기관경쟁률 미발표 상태")
 
-    # 2. 의무보유확약 비율 (배점: 30점)
-    if lockup_ratio >= 15:
+    if lockup_ratio >= 10:
         score += 30
-        reasons.append(f"확약 비율 {lockup_ratio}%로 기관 매물 잠김 우수")
-    elif lockup_ratio >= 8:
-        score += 20
-    elif lockup_ratio >= 3:
-        score += 10
     else:
-        score += 2
-        reasons.append(f"확약 비율 {lockup_ratio}%로 단기 차익 매물 주의")
+        score += 10
 
-    # 3. 유통가능 금액 (배점: 25점)
-    if float_amt_billion <= 400:
+    if float_amt_billion <= 500:
         score += 25
-        reasons.append(f"유통금액 {float_amt_billion}억으로 매우 가벼움")
-    elif float_amt_billion <= 700:
-        score += 18
-    elif float_amt_billion <= 1200:
+        reasons.append("유통금액 가벼움")
+    else:
+        score += 10
+        reasons.append("유통금액 다소 무거움")
+
+    if existing_ratio <= 30:
         score += 10
     else:
         score += 0
-        reasons.append(f"유통금액 {float_amt_billion}억으로 상장일 매물 부담 큼")
 
-    # 4. 기존 주주 비율 (배점: 10점)
-    if existing_ratio <= 20:
-        score += 10
-    elif existing_ratio <= 40:
-        score += 5
-    else:
-        score += 0
-        reasons.append(f"기존주주 비중 {existing_ratio}%로 매도 압력 주의")
-
-    # 등급 결정
     if score >= 80:
         grade = "STRONG_BUY"
     elif score >= 60:
@@ -72,94 +181,13 @@ def calculate_ipo_score(inst_ratio, lockup_ratio, float_amt_billion, existing_ra
 
     return score, grade, ". ".join(reasons)
 
-def fetch_data():
-    """
-    공모주 사이트 데이터 크롤링 및 파싱
-    (웹사이트 접근 차단 시 안전하게 대체 데이터를 보장하는 방어 로직 포함)
-    """
-    stocks = []
-    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
-    
-    try:
-        url = "https://www.38.co.kr/html/fund/index.htm?o=k"
-        res = requests.get(url, headers=headers, timeout=10)
-        res.encoding = "euc-kr"
-        print("38커뮤니케이션 연결 성공")
-    except Exception as e:
-        print(f"크롤링 수집 예외 발생: {e}")
-
-    # 현재 월 기준 분석 예시 데이터 (실제 수집 데이터 규격)
-    now = datetime.now()
-    cur_m = f"{now.year}-{now.month:02d}"
-
-    raw_list = [
-        {
-            "id": "1",
-            "name": "에이아이로보틱스",
-            "isSpac": False,
-            "price": 28000,
-            "bandStatus": "상단 +12% 초과",
-            "institutionalRatio": 1245.0,
-            "lockupRatio": 18.4,
-            "floatAmountBillion": 420,
-            "existingShareholderRatio": 18.0,
-            "underwriter": "미래에셋증권",
-            "subStartDate": f"{cur_m}-10",
-            "subEndDate": f"{cur_m}-11",
-            "listingDate": f"{cur_m}-20"
-        },
-        {
-            "id": "2",
-            "name": "솔리드메디컬",
-            "isSpac": False,
-            "price": 35000,
-            "bandStatus": "상단 확정",
-            "institutionalRatio": 480.0,
-            "lockupRatio": 2.1,
-            "floatAmountBillion": 1650,
-            "existingShareholderRatio": 54.0,
-            "underwriter": "한국투자증권",
-            "subStartDate": f"{cur_m}-17",
-            "subEndDate": f"{cur_m}-18",
-            "listingDate": f"{cur_m}-27"
-        },
-        {
-            "id": "3",
-            "name": "신한제15호스팩",
-            "isSpac": True,
-            "price": 2000,
-            "bandStatus": "고정가",
-            "institutionalRatio": 890.0,
-            "lockupRatio": 0.5,
-            "floatAmountBillion": 95,
-            "existingShareholderRatio": 0.0,
-            "underwriter": "신한투자증권",
-            "subStartDate": f"{cur_m}-24",
-            "subEndDate": f"{cur_m}-25",
-            "listingDate": f"{cur_m}-30"
-        }
-    ]
-
-    for item in raw_list:
-        score, grade, review = calculate_ipo_score(
-            item["institutionalRatio"],
-            item["lockupRatio"],
-            item["floatAmountBillion"],
-            item["existingShareholderRatio"],
-            item["isSpac"]
-        )
-        item["score"] = score
-        item["grade"] = grade
-        item["summaryReview"] = review
-        stocks.append(item)
-
-    return {
-        "updatedAt": datetime.now().strftime("%Y-%m-%d %H:%M"),
-        "stocks": stocks
-    }
-
 if __name__ == "__main__":
-    result = fetch_data()
+    real_stocks = parse_38_calendar()
+    output = {
+        "updatedAt": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "totalCount": len(real_stocks),
+        "stocks": real_stocks
+    }
     with open("ipo_data.json", "w", encoding="utf-8") as f:
-        json.dump(result, f, ensure_ascii=False, indent=2)
-    print("ipo_data.json 저장 성공!")
+        json.dump(output, f, ensure_ascii=False, indent=2)
+    print(f"총 {len(real_stocks)}개 실제 종목 수집 완료!")
