@@ -1,9 +1,30 @@
 {
-  "updatedAt": "2026-10-30 05:00:46",
-  "totalCount": 3,
+  "updatedAt": "2026-10-30 05:05:31",
+  "totalCount": 4,
   "stocks": [
     {
-      "id": "dart-26",
+      "id": "dart-9",
+      "corpCode": "00684918",
+      "name": "아이비케이투자증권",
+      "isSpac": false,
+      "reportTitle": "투자설명서(일괄신고)",
+      "price": 15000,
+      "bandStatus": "상단 초과",
+      "institutionalRatio": 1150.5,
+      "generalRatio": 1250.2,
+      "lockupRatio": 18.5,
+      "floatAmountBillion": 450,
+      "existingShareholderRatio": 28.5,
+      "underwriter": "아이비케이투자증권",
+      "subStartDate": "2026-11-13",
+      "subEndDate": "2026-11-14",
+      "listingDate": "2026-11-27",
+      "score": 100,
+      "grade": "STRONG_BUY",
+      "summaryReview": "기관경쟁률 1,000:1 이상 흥행. 의무보유확약 비율 양호. 유통금액 가벼움"
+    },
+    {
+      "id": "dart-38",
       "corpCode": "00113359",
       "name": "교보증권",
       "isSpac": false,
@@ -24,7 +45,7 @@
       "summaryReview": "기관경쟁률 1,000:1 이상 흥행. 의무보유확약 비율 양호. 유통금액 가벼움"
     },
     {
-      "id": "dart-63",
+      "id": "dart-75",
       "corpCode": "00148610",
       "name": "한화투자증권",
       "isSpac": false,
@@ -45,7 +66,7 @@
       "summaryReview": "기관경쟁률 1,000:1 이상 흥행. 의무보유확약 비율 양호. 유통금액 가벼움"
     },
     {
-      "id": "dart-87",
+      "id": "dart-99",
       "corpCode": "00164876",
       "name": "케이비증권",
       "isSpac": false,
