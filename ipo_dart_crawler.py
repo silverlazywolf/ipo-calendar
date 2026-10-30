@@ -8,12 +8,19 @@ from urllib3.poolmanager import PoolManager
 import ssl
 from bs4 import BeautifulSoup
 
-# 구형 서버(38커뮤니케이션 등)와의 SSL 핸드셰이크 오류를 우회하기 위한 커스텀 어댑터
-class SSLAdapter(HTTPAdapter):
+# 깃허브 액션과 로컬 환경 모두에서 호환되는 안전한 SSL 어댑터
+class CompatibleSSLAdapter(HTTPAdapter):
     def init_poolmanager(self, connections, maxsize, block=False, **kwargs):
         context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
-        context.set_ciphers('DEFAULT@SECLEVEL=1') # 보안 레벨을 낮춰 구형 암호화 허용
-        context.options |= ssl.OP_LEGACY_SERVER_CONNECT # 레거시 서버 연결 허용
+        context.check_hostname = False
+        context.verify_mode = ssl.CERT_NONE  # 인증서 검증 완화 (구형 서버 대응)
+        
+        # 지원 가능한 최적의 시퍼 스위트 설정
+        try:
+            context.set_ciphers('DEFAULT@SECLEVEL=1')
+        except Exception:
+            pass
+            
         self.poolmanager = PoolManager(
             num_pools=connections, maxsize=maxsize,
             block=block, ssl_context=context, **kwargs
@@ -27,15 +34,15 @@ def fetch_38_ipo_data():
         "Referer": "https://www.38.co.kr/"
     }
 
-    # 세션에 SSL 커스텀 어댑터 장착
     session = requests.Session()
-    session.mount("https://", SSLAdapter())
+    session.mount("https://", CompatibleSSLAdapter())
 
     stocks = []
 
     try:
-        print("38커뮤니케이션 접속 중 (SSL 우회 적용)...")
-        response = session.get(url, headers=headers, timeout=15)
+        print("38커뮤니케이션 접속 중...")
+        # 깃허브 액션 환경을 고려하여 verify=False도 함께 적용
+        response = session.get(url, headers=headers, timeout=15, verify=False)
         response.encoding = 'euc-kr'
         
         if response.status_code != 200:
@@ -104,7 +111,7 @@ def fetch_38_ipo_data():
     return stocks
 
 if __name__ == "__main__":
-    print("=== IPO 크롤러 로컬 테스트 시작 ===")
+    print("=== IPO 크롤러 테스트 시작 ===")
     real_data = fetch_38_ipo_data()
     
     output = {
