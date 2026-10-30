@@ -28,7 +28,7 @@
     .sheet.open { transform: translateY(0); }
     .sheet-handle { width: 36px; height: 4px; background: #cbd5e1; border-radius: 2px; margin: 0 auto 14px; }
     
-    /* 신호등 배지 스타일 보완 */
+    /* 신호등 배지 스타일 */
     .badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
     .badge.green { background: #dcfce7; color: #15803d; }
     .badge.yellow { background: #fef9c3; color: #a16207; }
@@ -38,14 +38,15 @@
     .dot.yellow { background: #ca8a04; }
     .dot.red { background: #dc2626; }
 
-    .metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 14px 0; }
-    .m-card { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 10px; }
+    /* metrics 카드: 유통금액 삭제로 3개 항목 배치 */
+    .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 14px 0; }
+    .m-card { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 10px; text-align: center; }
     .m-card .lbl { font-size: 11px; color: var(--text-muted); }
-    .m-card .val { font-size: 14px; font-weight: 700; margin-top: 2px; }
+    .m-card .val { font-size: 13px; font-weight: 700; margin-top: 2px; }
     .review { background: #f1f5f9; border-radius: 8px; padding: 12px; font-size: 12px; line-height: 1.5; color: #334155; margin-bottom: 14px; }
     .row { display: flex; justify-content: space-between; font-size: 12px; padding: 6px 0; border-bottom: 1px solid #f8fafc; }
     .row span:first-child { color: var(--text-muted); }
-    .row span:last-child { font-weight: 600; }
+    .row span:last-child { font-weight: 600; text-align: right; }
     #updateTime { font-size: 10px; color: var(--text-muted); text-align: right; padding: 6px 12px; }
   </style>
 </head>
@@ -72,14 +73,17 @@
       </div>
       <div id="sBadge" class="badge"></div>
     </div>
+    
+    <!-- 유통가능금액 제거 후 3개 지표로 변경 -->
     <div class="metrics">
       <div class="m-card"><div class="lbl">기관경쟁률</div><div class="val" id="sInst"></div></div>
       <div class="m-card"><div class="lbl">일반청약경쟁률</div><div class="val" id="sGeneral"></div></div>
       <div class="m-card"><div class="lbl">의무보유확약</div><div class="val" id="sLockup"></div></div>
-      <div class="m-card"><div class="lbl">유통가능금액</div><div class="val" id="sFloat"></div></div>
     </div>
+    
     <div class="review" id="sReview"></div>
-    <div class="row"><span>확정 공모가 / 상단여부</span><span id="sPrice" style="color:var(--primary);"></span></div>
+    <!-- 라벨 수정: 확정 공모가 / 희망가 -->
+    <div class="row"><span>확정 공모가 / 희망가</span><span id="sPrice" style="color:var(--primary);"></span></div>
     <div class="row"><span>청약 일정</span><span id="sPeriod"></span></div>
     <div class="row"><span>상장일</span><span id="sListing"></span></div>
   </div>
@@ -90,7 +94,6 @@
     let curYear = now.getFullYear();
     let curMonth = now.getMonth() + 1;
 
-    // KST 로컬 날짜 YYYY-MM-DD 변환
     function getFormattedDate(date) {
       const y = date.getFullYear();
       const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -98,10 +101,9 @@
       return `${y}-${m}-${d}`;
     }
 
-    // GitHub에 자동 생성되는 ipo_data.json 읽어오기
     async function loadData() {
       try {
-        const res = await fetch('ipo_data.json?t=' + new Date().getTime()); // 캐시 방지
+        const res = await fetch('ipo_data.json?t=' + new Date().getTime());
         if (res.ok) {
           const json = await res.json();
           stockData = json.stocks || [];
@@ -168,7 +170,6 @@
       document.getElementById('sName').innerText = st.name + (st.isSpac ? " (스팩)" : "");
       document.getElementById('sUnderwriter').innerText = `주관사: ${st.underwriter || '공시문서 참조'}`;
       
-      // 신호등 동그라미(🟢, 🟡, 🔴) 및 배지 연동
       const badge = document.getElementById('sBadge');
       const gradeText = st.grade === 'STRONG_BUY' ? '적극 추천' : st.grade === 'NEUTRAL' ? '선별 청약' : '주의/패스';
       const dotColor = st.grade === 'STRONG_BUY' ? 'green' : st.grade === 'NEUTRAL' ? 'yellow' : 'red';
@@ -176,15 +177,19 @@
       badge.innerHTML = `<span class="dot ${dotColor}"></span>${gradeText} (${st.score || 0}점)`;
       badge.className = `badge ${dotColor}`;
 
-      // 수치 콤마(,) 서식 적용 및 지표 출력
-      document.getElementById('sInst').innerText = st.institutionalRatio ? `${st.institutionalRatio.toLocaleString()}:1` : "미발표";
-      document.getElementById('sGeneral').innerText = st.generalRatio ? `${st.generalRatio.toLocaleString()}:1` : "미발표";
-      document.getElementById('sLockup').innerText = st.lockupRatio ? `${st.lockupRatio}%` : "0%";
-      document.getElementById('sFloat').innerText = st.floatAmountBillion ? `${st.floatAmountBillion.toLocaleString()}억 원` : "미정";
+      // 지표 서식
+      document.getElementById('sInst').innerText = (st.institutionalRatio && st.institutionalRatio > 0) ? `${st.institutionalRatio.toLocaleString()}:1` : "미발표";
+      document.getElementById('sGeneral').innerText = (st.generalRatio && st.generalRatio > 0) ? `${st.generalRatio.toLocaleString()}:1` : "-";
+      document.getElementById('sLockup').innerText = (st.lockupRatio !== undefined && st.lockupRatio !== null) ? `${st.lockupRatio}%` : "0%";
       document.getElementById('sReview').innerText = st.summaryReview || st.reportTitle || "내용 없음";
 
-      const priceText = st.price && st.price > 0 ? `${st.price.toLocaleString()}원` : "공시 참조";
-      document.getElementById('sPrice').innerText = `${priceText} (${st.bandStatus || '미정'})`;
+      // 공모가 / 희망가 범위 포맷팅
+      let confirmPrice = (st.price && st.price > 0) ? `${st.price.toLocaleString()}원` : "미정";
+      let bandRange = "";
+      if (st.priceLow && st.priceHigh && st.priceLow > 0 && st.priceHigh > 0) {
+        bandRange = ` (희망가: ${st.priceLow.toLocaleString()} ~ ${st.priceHigh.toLocaleString()}원)`;
+      }
+      document.getElementById('sPrice').innerText = `${confirmPrice}${bandRange}`;
       
       const startDate = st.subStartDate || st.receiptDate || "-";
       const endDate = st.subEndDate || st.receiptDate || "-";
