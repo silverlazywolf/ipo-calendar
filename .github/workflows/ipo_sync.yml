@@ -1,0 +1,32 @@
+name: Auto Update IPO Data
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # 매일 자정(UTC 기준, KST 기준 아침 9시)에 자동 실행
+  workflow_dispatch: # 깃허브 액션 탭에서 수동으로 [Run workflow] 버튼을 눌러 실행할 수 있게 함
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install requests beautifulsoup4 rich
+
+      - name: Run collector script
+        run: |
+          python ipo_collector.py
+
+      - name: Commit and push changes if ipo_data.json changed
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Auto-update IPO schedule data [skip ci]"
+          file_pattern: "ipo_data.json"
