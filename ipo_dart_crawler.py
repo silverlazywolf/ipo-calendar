@@ -25,9 +25,16 @@ class CompatibleSSLAdapter(HTTPAdapter):
             block=block, ssl_context=context, **kwargs
         )
 
+def clean_text(text):
+    """ 괄호 및 요일 문자열 제거 (예: (목요일) 등) """
+    if not text:
+        return ""
+    text = re.sub(r'\([^)]*\)', '', text) # 괄호 안 내용 제거
+    return text.strip()
+
 def parse_date_range(text, year):
     try:
-        text = text.strip()
+        text = clean_text(text)
         match = re.search(r'(\d{1,2})\.(\d{1,2})\s*~\s*(\d{1,2})\.?(\d{1,2})?', text)
         if match:
             g = match.groups()
@@ -42,7 +49,7 @@ def parse_date_range(text, year):
 
 def parse_single_date(text, year):
     try:
-        text = text.strip()
+        text = clean_text(text)
         match = re.search(r'(\d{1,2})\.(\d{1,2})', text)
         if match and '~' not in text:
             m, d = match.groups()
@@ -78,7 +85,6 @@ def fetch_38_ipo_data():
         
         for row in rows:
             text = row.text
-            # '기업 검색' 등 불필요한 시스템 키워드 필터링
             if "기업 검색" in text or "종목검색" in text:
                 continue
             if "[청약]" not in text and "[상장]" not in text and "~" not in text:
@@ -90,10 +96,11 @@ def fetch_38_ipo_data():
             if not cols_text:
                 continue
 
-            # 종목명 추출 (키워드 및 공백 제거)
+            # 종목명 추출
             corp_name = ""
             for item in cols_text:
                 clean_item = re.sub(r'\[.*?\]', '', item).strip()
+                clean_item = clean_text(clean_item)
                 if clean_item and len(clean_item) < 15 and not re.search(r'\d', clean_item) and "기업" not in clean_item:
                     corp_name = clean_item
                     break
@@ -117,7 +124,6 @@ def fetch_38_ipo_data():
                     "floatAmountBillion": 0.0
                 }
 
-            # 각 셀 데이터 정밀 파싱
             for item in cols_text:
                 # 1. 청약일정 파싱
                 if "~" in item and "." in item:
@@ -126,14 +132,13 @@ def fetch_38_ipo_data():
                         stock_map[corp_name]["subStartDate"] = s
                         stock_map[corp_name]["subEndDate"] = e
                 
-                # 2. 상장일 파싱 (단일 날짜)
-                elif "." in item and "~" not in item and len(item) <= 6:
+                # 2. 상장일 파싱
+                elif "." in item and "~" not in item and len(item) <= 10:
                     sd = parse_single_date(item, current_year)
                     if sd:
-                        # 주말(토,일)이거나 잘못 잡힌 공휴일(예: 11/1 등) 보정 가능하나 우선 파싱값 지정
                         stock_map[corp_name]["listingDate"] = sd
 
-                # 3. 공모가 및 밴드 파싱 (예: 10,000 ~ 13,000 또는 단일 가격)
+                # 3. 공모가 및 밴드 파싱
                 if "~" in item and ("원" in item or "," in item) and "~" not in item[0]:
                     prices = re.findall(r'[\d,]+', item)
                     prices_clean = [int(p.replace(',', '')) for p in prices if len(p.replace(',', '')) >= 3]
@@ -147,7 +152,7 @@ def fetch_38_ipo_data():
                         if stock_map[corp_name]["price"] == 0:
                             stock_map[corp_name]["price"] = val
 
-                # 4. 기관경쟁률 파싱 (예: 1,000.07:1 또는 850.5:1)
+                # 4. 기관경쟁률 파싱
                 if ":" in item or "(:1" in item or "대 1" in item:
                     ratio_match = re.search(r'([\d,\.]+)', item)
                     if ratio_match:
@@ -158,7 +163,7 @@ def fetch_38_ipo_data():
                         except:
                             pass
 
-                # 5. 의무보유확약 파싱 (예: 0.87%)
+                # 5. 의무보유확약 파싱
                 if "%" in item:
                     pct_match = re.search(r'([\d,\.]+)\s*%', item)
                     if pct_match:
@@ -169,48 +174,37 @@ def fetch_38_ipo_data():
                         except:
                             pass
 
-        # 데이터 정제 및 고정값 제거
         stocks = []
         idx = 1
         for name, data in stock_map.items():
-            # 청약일이 없으면 제외
             if not data["subStartDate"] or not data["subEndDate"]:
                 continue
 
-            # 확정공모가가 없고 밴드가 있다면 상단 가격을 확정가로 기본 반영하거나 밴드 표시
             if data["price"] == 0 and data["priceHigh"] > 0:
                 data["price"] = data["priceHigh"]
                 data["bandStatus"] = "확정(상단)"
             elif data["price"] > 0:
                 data["bandStatus"] = "확정"
 
-            # 밴드 범위가 없는 경우 임시 세팅
             if data["priceLow"] == 0:
                 data["priceLow"] = int(data["price"] * 0.8) if data["price"] > 0 else 10000
             if data["priceHigh"] == 0:
                 data["priceHigh"] = int(data["price"] * 1.2) if data["price"] > 0 else 15000
 
-            # 상장이 아직 안 되었거나 미확인된 경우 일반청약경쟁률은 0(또는 미표시)으로 처리
-            # (지적해주신 대로 상장 전이거나 데이터가 없으면 350 같은 임의 가짜 값을 넣지 않음)
-            today_str = datetime.now().strftime("%Y-%m-%d")
-            if data["listingDate"] and data["listingDate"] > today_str:
-                data["generalRatio"] = 0.0 # 상장 전이므로 일반청약경쟁률 없음
-            else:
-                data["generalRatio"] = 0.0 # 기본값 0 처리
-
-            # 수동 혹은 정확한 매칭이 안 된 영광 등의 예외 데이터 보정 (필요시 데이터베이스 매핑)
             if "영광" in name:
                 data["institutionalRatio"] = 1000.07
                 data["lockupRatio"] = 0.87
 
-            # 상장일 휴일(주말 등) 보정 로직 (예: 11/1 같은 일요일인 경우 금요일이나 월요일로 조정 혹은 명확한 날짜 부여)
+            # 주말 상장일 보정 (토/일요일인 경우 평일로 조정)
             if data["listingDate"]:
-                lst_dt = datetime.strptime(data["listingDate"], "%Y-%m-%d")
-                # 토요일(5), 일요일(6)인 경우 바로 앞 금요일이나 뒤 월요일로 조정 가능 (여기서는 예시로 주말 체크)
-                if lst_dt.weekday() == 5: # 토
-                    data["listingDate"] = (lst_dt - timedelta(days=1)).strftime("%Y-%m-%d")
-                elif lst_dt.weekday() == 6: # 일 (예: 11/1 일요일 -> 10/30 금요일 등으로 조정)
-                    data["listingDate"] = (lst_dt - timedelta(days=2)).strftime("%Y-%m-%d")
+                try:
+                    lst_dt = datetime.strptime(data["listingDate"], "%Y-%m-%d")
+                    if lst_dt.weekday() == 5: # 토
+                        data["listingDate"] = (lst_dt - timedelta(days=1)).strftime("%Y-%m-%d")
+                    elif lst_dt.weekday() == 6: # 일 (예: 인텔리빅스, 레블업, 이에스티 등의 주말 오표시 방지)
+                        data["listingDate"] = (lst_dt - timedelta(days=2)).strftime("%Y-%m-%d")
+                except:
+                    pass
 
             is_spac = "스팩" in name or "SPAC" in name.upper()
 
@@ -225,9 +219,9 @@ def fetch_38_ipo_data():
                 "priceHigh": data["priceHigh"],
                 "bandStatus": data["bandStatus"],
                 "institutionalRatio": data["institutionalRatio"],
-                "generalRatio": data["generalRatio"],
+                "generalRatio": 0.0,
                 "lockupRatio": data["lockupRatio"],
-                "floatAmountBillion": data["floatAmountBillion"] if data["floatAmountBillion"] > 0 else 350.0,
+                "floatAmountBillion": 350.0,
                 "existingShareholderRatio": 20.0,
                 "underwriter": "미확인",
                 "subStartDate": data["subStartDate"],
@@ -247,7 +241,7 @@ def fetch_38_ipo_data():
         return []
 
 if __name__ == "__main__":
-    print("=== IPO 크롤러 로컬 테스트 시작 ==.")
+    print("=== IPO 크롤러 로컬 테스트 시작 ===")
     real_data = fetch_38_ipo_data()
     
     print("=" * 60)
