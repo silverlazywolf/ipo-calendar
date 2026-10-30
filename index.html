@@ -1,127 +1,242 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>국내 공모주 일정 및 정보 대시보드</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>공모주 분석 캘린더</title>
+  <style>
+    :root { --primary: #2563eb; --bg: #f8fafc; --card: #ffffff; --border: #e2e8f0; --text: #0f172a; --text-muted: #64748b; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background-color: var(--bg); color: var(--text); padding-bottom: 40px; }
+    .header { background: #fff; padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; }
+    .header h1 { font-size: 17px; font-weight: 700; }
+    .nav-btn { background: #f1f5f9; border: none; border-radius: 6px; width: 30px; height: 30px; font-size: 13px; cursor: pointer; }
+    .weekdays { display: grid; grid-template-columns: repeat(7, 1fr); background: #fff; padding: 8px 4px 4px; text-align: center; font-size: 11px; font-weight: 600; color: var(--text-muted); }
+    .weekdays div:first-child { color: #dc2626; }
+    .weekdays div:last-child { color: #2563eb; }
+    .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; padding: 2px; background: #e2e8f0; }
+    .day-cell { background: #fff; min-height: 84px; padding: 4px 2px; display: flex; flex-direction: column; overflow: hidden; }
+    .day-cell.today { background: #f0fdf4; }
+    .day-num { font-size: 11px; font-weight: 600; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; border-radius: 50%; margin-bottom: 2px; }
+    .day-cell.today .day-num { background: #16a34a; color: #fff; }
+    .chip { font-size: 9px; padding: 2px 3px; border-radius: 3px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; font-weight: 500; }
+    .chip.sub { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+    .chip.listing { background: #faf5ff; color: #9333ea; border: 1px solid #e9d5ff; }
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; z-index: 100; }
+    .sheet { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-radius: 16px 16px 0 0; padding: 20px; max-height: 85vh; overflow-y: auto; transform: translateY(100%); transition: transform 0.25s ease-out; z-index: 101; }
+    .sheet.open { transform: translateY(0); }
+    .sheet-handle { width: 36px; height: 4px; background: #cbd5e1; border-radius: 2px; margin: 0 auto 14px; }
+    
+    /* 배지 스타일 */
+    .badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+    .badge.blue { background: #eff6ff; color: #2563eb; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .dot.blue { background: #2563eb; }
+
+    .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 14px 0; }
+    .m-card { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 10px; text-align: center; }
+    .m-card .lbl { font-size: 11px; color: var(--text-muted); }
+    .m-card .val { font-size: 12px; font-weight: 700; margin-top: 2px; word-break: break-all; }
+    .review { background: #f1f5f9; border-radius: 8px; padding: 12px; font-size: 12px; line-height: 1.5; color: #334155; margin-bottom: 14px; }
+    .row { display: flex; justify-content: space-between; font-size: 12px; padding: 6px 0; border-bottom: 1px solid #f8fafc; }
+    .row span:first-child { color: var(--text-muted); }
+    .row span:last-child { font-weight: 600; text-align: right; }
+    #updateTime { font-size: 10px; color: var(--text-muted); text-align: right; padding: 6px 12px; }
+  </style>
 </head>
-<body class="bg-gray-50 text-gray-900 font-sans">
+<body>
+  <div class="header">
+    <h1 id="monthTitle">로딩 중...</h1>
+    <div style="display: flex; gap: 6px;">
+      <button class="nav-btn" onclick="changeMonth(-1)">◀</button>
+      <button class="nav-btn" onclick="changeMonth(1)">▶</button>
+    </div>
+  </div>
+  <div id="updateTime"></div>
+  <div class="weekdays"><div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div></div>
+  <div class="calendar" id="calendarGrid"></div>
 
-    <div class="max-w-7xl mx-auto px-4 py-8">
-        <!-- 상단 헤더 -->
-        <header class="flex flex-col md:flex-row justify-between items-center mb-8 border-b pb-4">
-            <div>
-                <h1 class="text-3xl font-bold text-blue-600">📈 국내 공모주 일정 대시보드</h1>
-                <p class="text-sm text-gray-500 mt-1">38커뮤니케이션 데이터 기반 실시간 자동 업데이트</p>
-            </div>
-            <div class="mt-4 md:mt-0 text-right">
-                <span id="update-time" class="text-xs bg-blue-100 text-blue-800 px-3 py-1.5 rounded-full font-medium">데이터 로딩 중...</span>
-            </div>
-        </header>
-
-        <!-- 요약 카드 영역 -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider">총 수집 종목</h3>
-                <p id="total-count" class="text-3xl font-bold text-gray-800 mt-2">-</p>
-            </div>
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider">데이터 상태</h3>
-                <p class="text-3xl font-bold text-green-600 mt-2">정상 동기화</p>
-            </div>
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider">소스 출처</h3>
-                <p class="text-3xl font-bold text-indigo-600 mt-2">38 Communication</p>
-            </div>
-        </div>
-
-        <!-- 데이터 테이블 영역 -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-gray-50 border-b text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                            <th class="py-4 px-6">종목명</th>
-                            <th class="py-4 px-6">희망공모가</th>
-                            <th class="py-4 px-6">확정공모가</th>
-                            <th class="py-4 px-6">청약일</th>
-                            <th class="py-4 px-6">환불일</th>
-                            <th class="py-4 px-6">상장일</th>
-                            <th class="py-4 px-6 text-right">기관경쟁률</th>
-                            <th class="py-4 px-6 text-right">의무보유확약</th>
-                            <th class="py-4 px-6">주간사</th>
-                        </tr>
-                    </thead>
-                    <tbody id="ipo-table-body" class="divide-y divide-gray-100 text-sm">
-                        <!-- 데이터가 자바스크립트에 의해 동적으로 삽입됩니다 -->
-                        <tr>
-                            <td colspan="9" class="text-center py-8 text-gray-400">데이터를 불러오는 중입니다...</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+  <!-- 바텀시트 -->
+  <div class="overlay" id="overlay" onclick="closeSheet()"></div>
+  <div class="sheet" id="sheet">
+    <div class="sheet-handle"></div>
+    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+      <div>
+        <h2 id="sName" style="font-size:18px; font-weight:700;"></h2>
+        <div id="sUnderwriter" style="font-size:12px; color:var(--text-muted); margin-top:2px;"></div>
+      </div>
+      <div id="sBadge" class="badge blue"><span class="dot blue"></span>종목 정보</div>
+    </div>
+    
+    <!-- 3개 핵심 지표 카드 -->
+    <div class="metrics">
+      <div class="m-card"><div class="lbl">기관경쟁률</div><div class="val" id="sInst"></div></div>
+      <div class="m-card"><div class="lbl">청약경쟁률</div><div class="val" id="sGeneral"></div></div>
+      <div class="m-card"><div class="lbl">의무보유확약</div><div class="val" id="sLockup"></div></div>
+    </div>
+    
+    <div class="review" id="sLinkBox">
+      👉 원본 공세 페이지: <a id="sLink" href="#" target="_blank" style="color:var(--primary); text-decoration:underline;">38커뮤니케이션 링크 바로가기</a>
     </div>
 
-    <!-- 데이터 로딩 및 렌더링 스크립트 -->
-    <script>
-        async function loadIpoData() {
-            try {
-                // 동일 리포지토리 루트에 저장된 ipo_data.json 불러오기
-                const response = await fetch('ipo_data.json');
-                if (!response.ok) {
-                    throw new Error('데이터 파일을 찾을 수 없습니다.');
-                }
-                const data = await response.json();
+    <div class="row"><span>확정 공모가 / 희망가</span><span id="sPrice" style="color:var(--primary);"></span></div>
+    <div class="row"><span>청약 일정</span><span id="sPeriod"></span></div>
+    <div class="row"><span>상장일</span><span id="sListing"></span></div>
+  </div>
 
-                // 상단 정보 업데이트
-                document.getElementById('update-time').innerText = `최종 업데이트: ${data.updatedAt}`;
-                document.getElementById('total-count').innerText = `${data.totalCount}개`;
+  <script>
+    let stockData = [];
+    const now = new Date();
+    let curYear = now.getFullYear();
+    let curMonth = now.getMonth() + 1;
 
-                const tableBody = document.getElementById('ipo-table-body');
-                tableBody.innerHTML = '';
+    function getFormattedDate(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
 
-                if (!data.stocks || data.stocks.length === 0) {
-                    tableBody.innerHTML = `<tr><td colspan="9" class="text-center py-8 text-gray-400">등록된 공모주 데이터가 없습니다.</td></tr>`;
-                    return;
-                }
+    // "MM-DD", "MM.DD", "MM/DD" 형태의 문자열을 현재 연도 기준 Date 객체로 변환
+    function parseDateString(dateStr, year) {
+      if (!dateStr) return null;
+      const clean = dateStr.trim().replace(/\./g, '-').replace(/\//g, '-');
+      // "MM-DD ~ MM-DD" 형태인 경우 시작일 추출
+      const matchRange = clean.match(/(\d{1,2})-(\d{1,2})/);
+      if (matchRange) {
+        const m = matchRange[1].padStart(2, '0');
+        const d = matchRange[2].padStart(2, '0');
+        return `${year}-${m}-${d}`;
+      }
+      return null;
+    }
 
-                // 종목 리스트 렌더링
-                data.stocks.forEach(stock => {
-                    const row = document.createElement('tr');
-                    row.className = 'hover:bg-gray-50 transition-colors';
+    // 기간형 날짜 파싱 (시작일, 종료일 반환)
+    function parseDateRange(dateStr, year) {
+      if (!dateStr) return { start: null, end: null };
+      const clean = dateStr.trim().replace(/\./g, '-').replace(/\//g, '-');
+      const matches = [...clean.matchAll(/(\d{1,2})-(\d{1,2})/g)];
+      if (matches.length >= 2) {
+        const startM = matches[0][1].padStart(2, '0');
+        const startD = matches[0][2].padStart(2, '0');
+        const endM = matches[1][1].padStart(2, '0');
+        const endD = matches[1][2].padStart(2, '0');
+        return {
+          start: `${year}-${startM}-${startD}`,
+          end: `${year}-${endM}-${endD}`
+        };
+      } else if (matches.length === 1) {
+        const m = matches[0][1].padStart(2, '0');
+        const d = matches[0][2].padStart(2, '0');
+        const dateVal = `${year}-${m}-${d}`;
+        return { start: dateVal, end: dateVal };
+      }
+      return { start: null, end: null };
+    }
 
-                    row.innerHTML = `
-                        <td class="py-4 px-6 font-semibold text-gray-900">
-                            <a href="${stock.url}" target="_blank" class="hover:text-blue-600 hover:underline flex items-center gap-1">
-                                ${stock.name}
-                                <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-                            </a>
-                        </td>
-                        <td class="py-4 px-6 text-gray-600">${stock.priceBand}</td>
-                        <td class="py-4 px-6 font-medium text-blue-600">${stock.confirmedPrice}</td>
-                        <td class="py-4 px-6 text-gray-600">${stock.subDate}</td>
-                        <td class="py-4 px-6 text-gray-600">${stock.refundDate}</td>
-                        <td class="py-4 px-6 text-gray-600">${stock.listingDate}</td>
-                        <td class="py-4 px-6 text-right font-medium text-indigo-600">${stock.institutionalRatio}</td>
-                        <td class="py-4 px-6 text-right text-gray-600">${stock.lockupRatio}</td>
-                        <td class="py-4 px-6 text-gray-500 text-xs">${stock.underwriter}</td>
-                    `;
-                    tableBody.appendChild(row);
-                });
-
-            } catch (error) {
-                console.error('데이터 로드 실패:', error);
-                document.getElementById('ipo-table-body').innerHTML = `
-                    <tr><td colspan="9" class="text-center py-8 text-red-500">데이터를 불러오는 중 오류가 발생했습니다. (GitHub Actions가 아직 실행되지 않았거나 파일이 없을 수 있습니다)</td></tr>
-                `;
-            }
+    async function loadData() {
+      try {
+        const res = await fetch('ipo_data.json?t=' + new Date().getTime());
+        if (res.ok) {
+          const json = await res.json();
+          stockData = json.stocks || [];
+          if (json.updatedAt) {
+            document.getElementById('updateTime').innerText = `최근 분석 업데이트: ${json.updatedAt}`;
+          }
         }
+      } catch (e) {
+        console.log("데이터로드 실패 - 기본 모드로 실행됩니다.");
+      }
+      renderCalendar();
+    }
 
-        // 페이지 로드 시 데이터 호출
-        loadIpoData();
-    </script>
+    function renderCalendar() {
+      document.getElementById('monthTitle').innerText = `${curYear}년 ${curMonth}월`;
+      const grid = document.getElementById('calendarGrid');
+      grid.innerHTML = '';
+      const firstDay = new Date(curYear, curMonth - 1, 1).getDay();
+      const lastDate = new Date(curYear, curMonth, 0).getDate();
+      const todayStr = getFormattedDate(new Date());
+
+      for (let i = 0; i < firstDay; i++) {
+        const empty = document.createElement('div');
+        empty.className = 'day-cell';
+        empty.style.background = '#f8fafc';
+        grid.appendChild(empty);
+      }
+
+      for (let d = 1; d <= lastDate; d++) {
+        const cell = document.createElement('div');
+        cell.className = 'day-cell';
+        const dStr = `${curYear}-${String(curMonth).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        if (dStr === todayStr) cell.classList.add('today');
+
+        let html = `<div class="day-num">${d}</div>`;
+        
+        stockData.forEach(st => {
+          // 청약일 파싱
+          const subRange = parseDateRange(st.subDate, curYear);
+          // 상장일 파싱
+          const listDateStr = parseDateString(st.listingDate, curYear);
+
+          if (subRange.start && subRange.end && dStr >= subRange.start && dStr <= subRange.end) {
+            html += `<div class="chip sub" onclick="openSheet(event, '${st.no}')">청약: ${st.name}</div>`;
+          } else if (listDateStr && dStr === listDateStr) {
+            html += `<div class="chip listing" onclick="openSheet(event, '${st.no}')">상장: ${st.name}</div>`;
+          }
+        });
+
+        cell.innerHTML = html;
+        grid.appendChild(cell);
+      }
+    }
+
+    function changeMonth(d) {
+      curMonth += d;
+      if (curMonth > 12) { curMonth = 1; curYear++; }
+      if (curMonth < 1) { curMonth = 12; curYear--; }
+      renderCalendar();
+    }
+
+    function openSheet(event, no) {
+      if (event) event.stopPropagation();
+      const st = stockData.find(s => String(s.no) === String(no));
+      if (!st) return;
+
+      document.getElementById('sName').innerText = st.name;
+      document.getElementById('sUnderwriter').innerText = `주간사: ${st.underwriter || '미확인'}`;
+      
+      // 지표 매핑 (수집된 필드명 반영)
+      document.getElementById('sInst').innerText = st.institutionalRatio || "0:1";
+      document.getElementById('sGeneral').innerText = st.subscriptionRatio || "0:1";
+      document.getElementById('sLockup').innerText = st.lockupRatio || "0.0%";
+
+      // 링크 설정
+      const linkEl = document.getElementById('sLink');
+      if (st.url) {
+        linkEl.href = st.url;
+        linkEl.style.display = 'inline';
+      } else {
+        linkEl.style.display = 'none';
+      }
+
+      // 공모가 표시 (확정가와 희망가 조합)
+      let priceDisplay = st.confirmedPrice !== "미정" ? `${st.confirmedPrice} (확정)` : st.priceBand;
+      document.getElementById('sPrice').innerText = priceDisplay;
+      
+      document.getElementById('sPeriod').innerText = st.subDate || "미정";
+      document.getElementById('sListing').innerText = st.listingDate || "미정";
+
+      document.getElementById('overlay').style.display = 'block';
+      document.getElementById('sheet').classList.add('open');
+    }
+
+    function closeSheet() {
+      document.getElementById('overlay').style.display = 'none';
+      document.getElementById('sheet').classList.remove('open');
+    }
+
+    loadData();
+  </script>
 </body>
 </html>
