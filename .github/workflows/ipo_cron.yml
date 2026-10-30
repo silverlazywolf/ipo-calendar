@@ -1,0 +1,33 @@
+name: Update IPO Data
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # 매일 자정(UTC 기준) 자동 실행
+  workflow_dispatch: # 수동으로도 실행 가능
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run Crawler
+        env:
+          DART_API_KEY: ${{ secrets.DART_API_KEY }} # 2단계에서 등록한 비밀키를 안전하게 주입
+        run: python ipo_dart_crawler.py
+
+      - name: Commit and push ipo_data.json
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add ipo_data.json
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update IPO data" && git push)
