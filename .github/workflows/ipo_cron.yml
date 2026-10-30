@@ -22,7 +22,7 @@ jobs:
           python-version: '3.10'
 
       - name: Install dependencies
-        run: pip install requests
+        run: pip install requests beautifulsoup4
 
       - name: Run Crawler
         run: python ipo_dart_crawler.py
