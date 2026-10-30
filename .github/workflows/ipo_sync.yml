@@ -2,8 +2,12 @@ name: Auto Update IPO Data
 
 on:
   schedule:
-    - cron: '0 0 * * *' # 매일 자정(UTC 기준, KST 기준 아침 9시)에 자동 실행
-  workflow_dispatch: # 깃허브 액션 탭에서 수동으로 [Run workflow] 버튼을 눌러 실행할 수 있게 함
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+# 💡 이 부분을 추가해 줍니다.
+permissions:
+  contents: write
 
 jobs:
   build:
