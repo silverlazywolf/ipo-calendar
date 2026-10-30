@@ -3,7 +3,11 @@ name: Update IPO Data
 on:
   schedule:
     - cron: '0 0 * * *' # 매일 자정(UTC 기준) 자동 실행
-  workflow_dispatch: # GitHub 웹에서 수동으로 실행 가능
+  workflow_dispatch: # GitHub 웹에서 수동 실행 가능
+
+# 👇 [필수] GitHub Actions가 저장소에 접근하여 수정/푸시할 수 있도록 권한 부여
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -20,10 +24,11 @@ jobs:
       - name: Install dependencies
         run: pip install requests
 
-      - name: Run collector
+      - name: Run Crawler
         env:
-          DART_API_KEY: ${{ secrets.DART_API_KEY }} # GitHub Secrets에 등록한 키를 안전하게 주입
-        run: python collector.py
+          DART_API_KEY: ${{ secrets.DART_API_KEY }}
+        run: python ipo_dart_crawler.py
+
       - name: Commit and push ipo_data.json
         run: |
           git config --global user.name "github-actions[bot]"
