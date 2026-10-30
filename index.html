@@ -27,7 +27,6 @@
     .sheet.open { transform: translateY(0); }
     .sheet-handle { width: 36px; height: 4px; background: #cbd5e1; border-radius: 2px; margin: 0 auto 14px; }
     
-    /* 배지 스타일 */
     .badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
     .badge.blue { background: #eff6ff; color: #2563eb; }
     .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
@@ -68,7 +67,6 @@
       <div id="sBadge" class="badge blue"><span class="dot blue"></span>종목 정보</div>
     </div>
     
-    <!-- 3개 핵심 지표 카드 -->
     <div class="metrics">
       <div class="m-card"><div class="lbl">기관경쟁률</div><div class="val" id="sInst"></div></div>
       <div class="m-card"><div class="lbl">청약경쟁률</div><div class="val" id="sGeneral"></div></div>
@@ -76,11 +74,12 @@
     </div>
     
     <div class="review" id="sLinkBox">
-      👉 원본 공세 페이지: <a id="sLink" href="#" target="_blank" style="color:var(--primary); text-decoration:underline;">38커뮤니케이션 링크 바로가기</a>
+      👉 상세보기: <a id="sLink" href="#" target="_blank" style="color:var(--primary); font-weight:bold; text-decoration:underline;">38커뮤니케이션 상세 페이지 이동</a>
     </div>
 
     <div class="row"><span>확정 공모가 / 희망가</span><span id="sPrice" style="color:var(--primary);"></span></div>
     <div class="row"><span>청약 일정</span><span id="sPeriod"></span></div>
+    <div class="row"><span>환불일</span><span id="sRefund"></span></div>
     <div class="row"><span>상장일</span><span id="sListing"></span></div>
   </div>
 
@@ -97,25 +96,23 @@
       return `${y}-${m}-${d}`;
     }
 
-    // "MM-DD", "MM.DD", "MM/DD" 형태의 문자열을 현재 연도 기준 Date 객체로 변환
+    // 단일 날짜 파싱 (예: "10.24", "10/24")
     function parseDateString(dateStr, year) {
-      if (!dateStr) return null;
-      const clean = dateStr.trim().replace(/\./g, '-').replace(/\//g, '-');
-      // "MM-DD ~ MM-DD" 형태인 경우 시작일 추출
-      const matchRange = clean.match(/(\d{1,2})-(\d{1,2})/);
-      if (matchRange) {
-        const m = matchRange[1].padStart(2, '0');
-        const d = matchRange[2].padStart(2, '0');
+      if (!dateStr || dateStr === "미정") return null;
+      const matches = dateStr.match(/(\d{1,2})[-./](\d{1,2})/);
+      if (matches) {
+        const m = matches[1].padStart(2, '0');
+        const d = matches[2].padStart(2, '0');
         return `${year}-${m}-${d}`;
       }
       return null;
     }
 
-    // 기간형 날짜 파싱 (시작일, 종료일 반환)
+    // 기간형 날짜 파싱 (예: "10.24 ~ 10.25")
     function parseDateRange(dateStr, year) {
-      if (!dateStr) return { start: null, end: null };
-      const clean = dateStr.trim().replace(/\./g, '-').replace(/\//g, '-');
-      const matches = [...clean.matchAll(/(\d{1,2})-(\d{1,2})/g)];
+      if (!dateStr || dateStr === "미정") return { start: null, end: null };
+      const matches = [...dateStr.matchAll(/(\d{1,2})[-./](\d{1,2})/g)];
+      
       if (matches.length >= 2) {
         const startM = matches[0][1].padStart(2, '0');
         const startD = matches[0][2].padStart(2, '0');
@@ -145,7 +142,7 @@
           }
         }
       } catch (e) {
-        console.log("데이터로드 실패 - 기본 모드로 실행됩니다.");
+        console.log("데이터 로드 실패 - JSON 데이터 확인 필요");
       }
       renderCalendar();
     }
@@ -174,9 +171,7 @@
         let html = `<div class="day-num">${d}</div>`;
         
         stockData.forEach(st => {
-          // 청약일 파싱
           const subRange = parseDateRange(st.subDate, curYear);
-          // 상장일 파싱
           const listDateStr = parseDateString(st.listingDate, curYear);
 
           if (subRange.start && subRange.end && dStr >= subRange.start && dStr <= subRange.end) {
@@ -204,14 +199,12 @@
       if (!st) return;
 
       document.getElementById('sName').innerText = st.name;
-      document.getElementById('sUnderwriter').innerText = `주간사: ${st.underwriter || '미확인'}`;
+      document.getElementById('sUnderwriter').innerText = `주관사: ${st.underwriter || '미확인'}`;
       
-      // 지표 매핑 (수집된 필드명 반영)
       document.getElementById('sInst').innerText = st.institutionalRatio || "0:1";
       document.getElementById('sGeneral').innerText = st.subscriptionRatio || "0:1";
       document.getElementById('sLockup').innerText = st.lockupRatio || "0.0%";
 
-      // 링크 설정
       const linkEl = document.getElementById('sLink');
       if (st.url) {
         linkEl.href = st.url;
@@ -220,11 +213,11 @@
         linkEl.style.display = 'none';
       }
 
-      // 공모가 표시 (확정가와 희망가 조합)
-      let priceDisplay = st.confirmedPrice !== "미정" ? `${st.confirmedPrice} (확정)` : st.priceBand;
+      let priceDisplay = st.confirmedPrice && st.confirmedPrice !== "미정" ? `${st.confirmedPrice} (확정)` : st.priceBand;
       document.getElementById('sPrice').innerText = priceDisplay;
       
       document.getElementById('sPeriod').innerText = st.subDate || "미정";
+      document.getElementById('sRefund').innerText = st.refundDate || "미정";
       document.getElementById('sListing').innerText = st.listingDate || "미정";
 
       document.getElementById('overlay').style.display = 'block';
