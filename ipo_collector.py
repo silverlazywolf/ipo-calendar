@@ -32,7 +32,7 @@ def clean_text(text):
     return re.sub(r'\s+', ' ', text).strip()
 
 def parse_detail_page_robust(session, detail_url, default_name):
-    """상세 페이지 데이터 정밀 파서"""
+    """상세 페이지 정밀 파서 (희망공모가와 확정공모가 모두 수집)"""
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
         "Referer": "https://www.38.co.kr/html/fund/?o=k"
@@ -58,9 +58,8 @@ def parse_detail_page_robust(session, detail_url, default_name):
             return detail_info
 
         soup = BeautifulSoup(res.text, 'html.parser')
-        full_text = clean_text(soup.get_text())
 
-        # 1. 테이블 행(tr) 순회 매칭
+        # 테이블 행 순회하며 희망공모가와 확정공모가 모두 독립적으로 수집
         for tr in soup.find_all('tr'):
             tds = tr.find_all(['td', 'th'])
             texts = [clean_text(td.text) for td in tds]
@@ -68,57 +67,74 @@ def parse_detail_page_robust(session, detail_url, default_name):
             for i, t in enumerate(texts):
                 if i + 1 < len(texts):
                     next_t = texts[i + 1]
+
+                    if any(bad in next_t for bad in ["동원파츠", "확정공모가2", "구분", "주주명"]):
+                        continue
                     
-                    if "희망공모가액" in t and detail_info["priceBand"] == "미정":
-                        if next_t and ("~" in next_t or "원" in next_t):
-                            detail_info["priceBand"] = next_t
+                    # 1. 희망공모가 (밴드 형식)
+                    if "희망공모가" in t and detail_info["priceBand"] == "미정":
+                        m = re.search(r'([\d,]+\s*~\s*[\d,]+\s*원)', next_t)
+                        if m:
+                            detail_info["priceBand"] = re.sub(r'\s+', '', m.group(1))
+                    
+                    # 2. 확정공모가
                     elif "확정공모가" in t and detail_info["confirmedPrice"] == "미정":
-                        if next_t and next_t != "확정공모가":
-                            detail_info["confirmedPrice"] = next_t
+                        m = re.search(r'^([\d,]+원)$', next_t.replace(" ", ""))
+                        if m:
+                            detail_info["confirmedPrice"] = m.group(1)
+                        else:
+                            # 밴드 형태로 확정가가 적혀있는 경우 대응
+                            m_band = re.search(r'([\d,]+\s*~\s*[\d,]+\s*원)', next_t)
+                            if m_band and "~" in next_t:
+                                # 확정가가 밴드로 나온 경우 확정가로 처리하거나 밴드에 반영 가능
+                                pass
+                    
+                    # 3. 청약경쟁률 (일반)
                     elif "청약경쟁률" in t and "기관" not in t and detail_info["subscriptionRatio"] == "0:1":
-                        if ":" in next_t:
-                            detail_info["subscriptionRatio"] = next_t
+                        m = re.search(r'([\d,\.]+\s*:\s*1)', next_t)
+                        if m:
+                            detail_info["subscriptionRatio"] = m.group(1).replace(" ", "")
+                            
+                    # 4. 기관경쟁률
+                    elif "기관" in t and "경쟁률" in t and detail_info["institutionalRatio"] == "0:1":
+                        m = re.search(r'([\d,\.]+\s*:\s*1)', next_t)
+                        if m:
+                            detail_info["institutionalRatio"] = m.group(1).replace(" ", "")
+                            
+                    # 5. 의무보유확약
+                    elif "의무보유" in t and detail_info["lockupRatio"] == "0.0%":
+                        m = re.search(r'([\d,\.]+\s*%)', next_t)
+                        if m:
+                            detail_info["lockupRatio"] = m.group(1).replace(" ", "")
+                            
+                    # 6. 주간사
                     elif "주간사" in t and detail_info["underwriter"] == "미확인":
-                        if next_t and len(next_t) > 1:
-                            detail_info["underwriter"] = next_t
+                        if len(next_t) > 1 and "주간사" not in next_t and not next_t.startswith("주식수"):
+                            clean_uw = re.sub(r'주식수.*', '', next_t).strip()
+                            if clean_uw and len(clean_uw) < 30:
+                                detail_info["underwriter"] = clean_uw
+                            
+                    # 7. 공모청약일
                     elif "공모청약일" in t and detail_info["subDate"] == "미정":
-                        if next_t:
-                            detail_info["subDate"] = next_t
+                        m = re.search(r'(\d{4}[\./-]\d{1,2}[\./-]\d{1,2}\s*~\s*\d{4}[\./-]\d{1,2}[\./-]\d{1,2})', next_t)
+                        if m:
+                            detail_info["subDate"] = m.group(1).replace(" ", "")
+                        else:
+                            m_short = re.search(r'(\d{4}[\./-]\d{1,2}[\./-]\d{1,2})', next_t)
+                            if m_short:
+                                detail_info["subDate"] = next_t
+                            
+                    # 8. 환불일
                     elif "환불일" in t and detail_info["refundDate"] == "미정":
-                        if next_t:
-                            detail_info["refundDate"] = next_t
+                        m = re.search(r'(\d{4}[\./-]\d{1,2}[\./-]\d{1,2})', next_t)
+                        if m:
+                            detail_info["refundDate"] = m.group(1)
+                            
+                    # 9. 상장일
                     elif ("신규상장일" in t or "상장일" in t) and detail_info["listingDate"] == "미정":
-                        if next_t and "상장일" not in next_t:
-                            detail_info["listingDate"] = next_t
-
-        # 2. 전체 페이지 텍스트 기반 정밀 정규식 보완 (누락 방지)
-        if detail_info["priceBand"] == "미정":
-            m = re.search(r'희망공모가액[^\d]*([\d,]+\s*~\s*[\d,]+원?)', full_text)
-            if m: detail_info["priceBand"] = m.group(1).strip()
-
-        if detail_info["confirmedPrice"] == "미정":
-            m = re.search(r'확정공모가[^\d]*([\d,]+원?)', full_text)
-            if m: detail_info["confirmedPrice"] = m.group(1).strip()
-
-        if detail_info["institutionalRatio"] == "0:1":
-            m = re.search(r'기관(?:신청)?경쟁률[^\d]*([\d,\.]+\s*:\s*1)', full_text)
-            if m: detail_info["institutionalRatio"] = m.group(1).strip()
-
-        if detail_info["lockupRatio"] == "0.0%":
-            m = re.search(r'의무보유확약[^\d]*([\d,\.]+\s*%)', full_text)
-            if m: detail_info["lockupRatio"] = m.group(1).strip()
-
-        if detail_info["subDate"] == "미정":
-            m = re.search(r'공모청약일[^\d]*(\d{1,2}[-./]\d{1,2}(?:\s*~\s*\d{1,2}[-./]\d{1,2})?)', full_text)
-            if m: detail_info["subDate"] = m.group(1).strip()
-
-        if detail_info["refundDate"] == "미정":
-            m = re.search(r'환불일[^\d]*(\d{1,2}[-./]\d{1,2})', full_text)
-            if m: detail_info["refundDate"] = m.group(1).strip()
-
-        if detail_info["listingDate"] == "미정":
-            m = re.search(r'(?:신규)?상장일[^\d]*(\d{1,2}[-./]\d{1,2})', full_text)
-            if m: detail_info["listingDate"] = m.group(1).strip()
+                        m = re.search(r'(\d{4}[\./-]\d{1,2}[\./-]\d{1,2})', next_t)
+                        if m:
+                            detail_info["listingDate"] = m.group(1)
 
     except Exception as e:
         print(f"  ⚠️ 상세 페이지 파싱 중 에러 ({detail_url}): {e}")
@@ -126,10 +142,10 @@ def parse_detail_page_robust(session, detail_url, default_name):
     return detail_info
 
 def print_vscode_preview(stocks):
-    """터미널 프리뷰 출력"""
-    print("\n" + "=" * 120)
+    """VS Code 터미널 프리뷰 출력 (희망공모가와 확정공모가 동시 표시)"""
+    print("\n" + "=" * 130)
     print(f" 🚀 38커뮤니케이션 공모주 수집 결과 프리뷰 (총 {len(stocks)}개 종목)")
-    print("=" * 120)
+    print("=" * 130)
 
     try:
         from rich.console import Console
@@ -140,7 +156,8 @@ def print_vscode_preview(stocks):
 
         table.add_column("No", justify="center", style="cyan", no_wrap=True)
         table.add_column("종목명", style="bold white", no_wrap=True)
-        table.add_column("희망공모가 / 확정가", style="yellow")
+        table.add_column("희망공모가(밴드)", style="yellow")
+        table.add_column("확정공모가", style="bright_yellow")
         table.add_column("청약일", style="green")
         table.add_column("상장일", style="magenta")
         table.add_column("기관경쟁률", justify="right", style="blue")
@@ -148,11 +165,11 @@ def print_vscode_preview(stocks):
         table.add_column("주간사", style="dim")
 
         for item in stocks:
-            price_display = item["confirmedPrice"] if item["confirmedPrice"] != "미정" else item["priceBand"]
             table.add_row(
                 item["no"],
                 item["name"],
-                price_display,
+                item["priceBand"],
+                item["confirmedPrice"],
                 item["subDate"],
                 item["listingDate"],
                 item["institutionalRatio"],
@@ -163,13 +180,12 @@ def print_vscode_preview(stocks):
         console.print(table)
 
     except ImportError:
-        print(f"{'No':<6} | {'종목명':<12} | {'공모가(확정/밴드)':<18} | {'청약일':<11} | {'상장일':<6} | {'기관경쟁률':<10} | {'확약':<6} | {'주간사'}")
-        print("-" * 120)
+        print(f"{'No':<6} | {'종목명':<12} | {'희망공모가(밴드)':<16} | {'확정공모가':<12} | {'청약일':<11} | {'상장일':<6} | {'기관경쟁률':<10} | {'확약':<6} | {'주간사'}")
+        print("-" * 130)
         for item in stocks:
-            p_val = item["confirmedPrice"] if item["confirmedPrice"] != "미정" else item["priceBand"]
-            print(f"{item['no']:<6} | {item['name']:<12} | {p_val:<18} | {item['subDate']:<11} | {item['listingDate']:<6} | {item['institutionalRatio']:<10} | {item['lockupRatio']:<6} | {item['underwriter']}")
+            print(f"{item['no']:<6} | {item['name']:<12} | {item['priceBand']:<16} | {item['confirmedPrice']:<12} | {item['subDate']:<11} | {item['listingDate']:<6} | {item['institutionalRatio']:<10} | {item['lockupRatio']:<6} | {item['underwriter']}")
 
-    print("=" * 120 + "\n")
+    print("=" * 130 + "\n")
 
 def get_full_ipo_data():
     url = "https://www.38.co.kr/html/fund/?o=k"
@@ -219,11 +235,17 @@ def get_full_ipo_data():
                             continue
                         seen_names.add(corp_name)
 
-                        detail_url = f"https://www.38.co.kr/html/fund/?o=v&no={no_val}&l=&page=1"
+                        if href.startswith('/'):
+                            full_detail_url = f"https://www.38.co.kr{href}"
+                        elif href.startswith('http'):
+                            full_detail_url = href
+                        else:
+                            full_detail_url = f"https://www.38.co.kr/html/fund/{href}"
+
                         ipo_list.append({
                             "no": no_val,
                             "name": corp_name,
-                            "url": detail_url
+                            "url": full_detail_url
                         })
 
         print(f"✅ 유효 종목 {len(ipo_list)}개 발견. 상세 페이지 파싱 시작...\n")
@@ -255,7 +277,6 @@ if __name__ == "__main__":
             "stocks": ipo_data
         }
         
-        # GitHub 저장소 루트 경로에 안전하게 저장되도록 설정
         output_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ipo_data.json")
         with open(output_path, "w", encoding="utf-8") as f:
             json.dump(output, f, ensure_ascii=False, indent=2)
