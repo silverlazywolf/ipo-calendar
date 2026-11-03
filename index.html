@@ -144,45 +144,16 @@
       return { start: null, end: null };
     }
 
-    // 💡 업데이트 일시를 한국 표준시(KST)로 포맷 변환하는 함수
-    function formatToKST(dateString) {
-      if (!dateString) return '';
-      
-      // UTC 기준 날짜 문자열에 타임존 정보가 없을 경우 'Z'를 추가하여 UTC로 인식하도록 보정
-      let isoStr = dateString.trim();
-      if (!isoStr.endsWith('Z') && !isoStr.includes('+')) {
-        isoStr = isoStr.replace(' ', 'T') + 'Z';
-      }
-
-      const date = new Date(isoStr);
-      // 만약 유효하지 않은 날짜인 경우 원본 텍스트 반환
-      if (isNaN(date.getTime())) {
-        return dateString;
-      }
-
-      // Asia/Seoul 시간대로 변환 포맷팅 (예: 2026. 11. 03. 14:30:15)
-      return date.toLocaleString('ko-KR', {
-        timeZone: 'Asia/Seoul',
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: false
-      });
-    }
-
     async function loadData() {
       try {
         const res = await fetch('ipo_data.json?t=' + new Date().getTime());
         if (res.ok) {
           const json = await res.json();
           stockData = json.stocks || [];
+          
+          // 💡 파이썬에서 KST(한국 표준시)로 완성된 문자열을 그대로 바인딩합니다.
           if (json.updatedAt) {
-            // 💡 한국 시간 포맷 변환 적용
-            const kstTime = formatToKST(json.updatedAt);
-            document.getElementById('updateTime').innerText = `최근 분석 업데이트: ${kstTime}`;
+            document.getElementById('updateTime').innerText = `최근 분석 업데이트: ${json.updatedAt}`;
           }
         }
       } catch (e) {
