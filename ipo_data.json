@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-03 01:58:15",
+  "updatedAt": "2026-11-03 18:31:20",
   "totalCount": 30,
   "stocks": [
     {
@@ -185,7 +185,7 @@
       "url": "https://www.38.co.kr/html/fund/?o=v&no=2345&l=&page=1"
     },
     {
-      "name": "에스에프씨",
+      "name": "에스에프씨(유가)",
       "priceBand": "31,600~36,100원",
       "confirmedPrice": "미정",
       "subscriptionRatio": "0:1",
@@ -299,14 +299,14 @@
     {
       "name": "영광와이케이엠씨",
       "priceBand": "9,400~11,000원",
-      "confirmedPrice": "미정",
+      "confirmedPrice": "11,000원",
       "subscriptionRatio": "0:1",
       "underwriter": "대신증권",
       "subDate": "2026.11.04~2026.11.05",
       "refundDate": "2026.11.09",
-      "listingDate": "미정",
-      "institutionalRatio": "0:1",
-      "lockupRatio": "0.00%",
+      "listingDate": "2026.11.16",
+      "institutionalRatio": "1163.35:1",
+      "lockupRatio": "7.21%",
       "no": "2342",
       "url": "https://www.38.co.kr/html/fund/?o=v&no=2342&l=&page=1"
     },
@@ -328,7 +328,7 @@
       "name": "바로팜",
       "priceBand": "16,400~20,200원",
       "confirmedPrice": "16,400원",
-      "subscriptionRatio": "0:1",
+      "subscriptionRatio": "19.27:1",
       "underwriter": "미래에셋증권",
       "subDate": "2026.11.02~2026.11.03",
       "refundDate": "2026.11.05",
@@ -342,7 +342,7 @@
       "name": "동원파츠",
       "priceBand": "23,000~26,500원",
       "confirmedPrice": "26,500원",
-      "subscriptionRatio": "0:1",
+      "subscriptionRatio": "1219.37:1",
       "underwriter": "삼성증권",
       "subDate": "2026.11.02~2026.11.03",
       "refundDate": "2026.11.05",
@@ -395,7 +395,7 @@
       "url": "https://www.38.co.kr/html/fund/?o=v&no=2332&l=&page=1"
     },
     {
-      "name": "영광",
+      "name": "영광(구.영광공작소)",
       "priceBand": "14,000~17,000원",
       "confirmedPrice": "17,000원",
       "subscriptionRatio": "684.73:1",
