@@ -2,7 +2,8 @@ name: Auto Update IPO Data
 
 on:
   schedule:
-    - cron: '0 0 * * *'
+    # 한국 시간 기준: 매일 09:00, 14:00, 15:00 (UTC 00:00, 05:00, 06:00)
+    - cron: '0 0,5,6 * * *'
   workflow_dispatch:
 
 # 💡 이 부분을 추가해 줍니다.
