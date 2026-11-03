@@ -1,13 +1,18 @@
 import os
 import re
 import json
-from datetime import datetime
+import time
+import random
+from datetime import datetime, timezone, timedelta
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.poolmanager import PoolManager
 import ssl
 from bs4 import BeautifulSoup
 import urllib3
+
+# 한국 표준시(KST, UTC+9) 정의
+KST = timezone(timedelta(hours=9))
 
 # 경고 로그 비활성화
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -82,12 +87,6 @@ def parse_detail_page_robust(session, detail_url, default_name):
                         m = re.search(r'^([\d,]+원)$', next_t.replace(" ", ""))
                         if m:
                             detail_info["confirmedPrice"] = m.group(1)
-                        else:
-                            # 밴드 형태로 확정가가 적혀있는 경우 대응
-                            m_band = re.search(r'([\d,]+\s*~\s*[\d,]+\s*원)', next_t)
-                            if m_band and "~" in next_t:
-                                # 확정가가 밴드로 나온 경우 확정가로 처리하거나 밴드에 반영 가능
-                                pass
                     
                     # 3. 청약경쟁률 (일반)
                     elif "청약경쟁률" in t and "기관" not in t and detail_info["subscriptionRatio"] == "0:1":
@@ -228,7 +227,7 @@ def get_full_ipo_data():
 
                     link_text = clean_text(a.text)
                     corp_name = re.sub(r'^\d{1,2}[/.]\d{1,2}\s*', '', link_text)
-                    corp_name = re.sub(r'\[.*?\]|\(.*?\)', '', corp_name).strip()
+                    corp_name = re.sub(r'$.*?$|$.*?$', '', corp_name).strip()
                     
                     if corp_name and len(corp_name) < 15 and not corp_name.isdigit():
                         if corp_name in seen_names:
@@ -257,6 +256,9 @@ def get_full_ipo_data():
             detail_data["no"] = item["no"]
             detail_data["url"] = item["url"]
             results.append(detail_data)
+            
+            # 💡 대상 서버 차단 방지를 위한 미세 랜덤 지연 (0.3초 ~ 0.7초)
+            time.sleep(random.uniform(0.3, 0.7))
 
         return results
 
@@ -271,8 +273,11 @@ if __name__ == "__main__":
     if ipo_data:
         print_vscode_preview(ipo_data)
         
+        # 💡 GitHub Actions 환경(UTC)에서도 무조건 한국 표준시(KST)로 저장되도록 설정
+        now_kst = datetime.now(KST).strftime("%Y-%m-%d %H:%M:%S")
+        
         output = {
-            "updatedAt": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "updatedAt": now_kst,
             "totalCount": len(ipo_data),
             "stocks": ipo_data
         }
@@ -281,6 +286,6 @@ if __name__ == "__main__":
         with open(output_path, "w", encoding="utf-8") as f:
             json.dump(output, f, ensure_ascii=False, indent=2)
             
-        print(f"🎉 총 {len(ipo_data)}개 종목 데이터 수집 완료 및 {output_path} 저장 성공!")
+        print(f"🎉 총 {len(ipo_data)}개 종목 데이터 수집 완료 및 {output_path} 저장 성공! (기록 일시: {now_kst} KST)")
     else:
         print("❌ 수집된 데이터가 없습니다.")
