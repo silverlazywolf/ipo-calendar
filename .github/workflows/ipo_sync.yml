@@ -2,11 +2,14 @@ name: Auto Update IPO Data
 
 on:
   schedule:
-    # 💡 정각(00분) 부하 및 큐 지연을 피하기 위해 15분으로 설정
-    # 한국 시간 기준: 매일 09:15, 14:15, 15:15
-    # UTC 기준: 매일 00:15, 05:15, 06:15
-    - cron: '15 0,5,6 * * *'
-  workflow_dispatch: # Actions 탭에서 수동 실행 지원
+    # 💡 한국 시간 기준:
+    # 1) 매일 08:50 (장 시작 전 상장 알림) -> UTC 23:50 (전날)
+    # 2) 매일 14:15 (오후 데이터 중간 갱신) -> UTC 05:15
+    # 3) 매일 15:00 (청약 마감 전 마지막날 알림) -> UTC 06:00
+    - cron: '50 23 * * *'
+    - cron: '15 5 * * *'
+    - cron: '0 6 * * *'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -27,7 +30,6 @@ jobs:
         run: |
           pip install requests beautifulsoup4 rich urllib3
 
-      # 💡 텔레그램 시크릿 환경변수를 전달하도록 env 추가
       - name: Run collector script
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
