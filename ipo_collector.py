@@ -199,11 +199,9 @@ def is_sub_closing_today(sub_date_str, dt_obj):
     """오늘이 공모청약 마지막 날인지 판별"""
     if not sub_date_str or sub_date_str == "미정":
         return False
-    # 기간 형태 (예: 2026.11.03~2026.11.04)
     if "~" in sub_date_str:
         end_part = sub_date_str.split("~")[-1].strip()
         return is_date_match(end_part, dt_obj)
-    # 단일 날짜인 경우
     return is_date_match(sub_date_str, dt_obj)
 
 def send_telegram_msg(token, chat_id, text):
@@ -228,6 +226,7 @@ def process_telegram_notifications(stocks, now_kst):
     """시간대별 맞춤 알림 발송: 
        - 오전 8시경: 오늘 신규 상장 종목 알림
        - 오후 3시(15시)경: 오늘 청약 마감(마지막 날) 종목 알림
+       - 테스트 모드: FORCE_TELEGRAM_TEST 환경변수가 있으면 강제 실행
     """
     token = os.environ.get("TELEGRAM_BOT_TOKEN")
     chat_id = os.environ.get("TELEGRAM_CHAT_ID")
@@ -237,12 +236,21 @@ def process_telegram_notifications(stocks, now_kst):
         return
 
     cur_hour = now_kst.hour
+    test_mode = os.environ.get("FORCE_TELEGRAM_TEST", "false").lower() == "true"
+    
     print(f"⏰ 알림 조건 확인 (현재 KST 시간: {now_kst.strftime('%H:%M')})")
+    if test_mode:
+        print("🧪 [테스트 모드 활성화됨] 시간 조건을 무시하고 테스트 알림을 발송합니다.")
 
-    # 1. [오전 8시대 또는 9시 직전] 오늘 상장 종목 알림 (장 시작 전)
-    # (수동 실행 시에도 테스트 가능하도록 조건 처리)
-    if cur_hour == 8 or (cur_hour == 9 and now_kst.minute <= 10):
+    # 1. 오늘 상장 종목 알림 (시간 조건 혹은 테스트 모드)
+    if test_mode or cur_hour == 8 or (cur_hour == 9 and now_kst.minute <= 10):
+        # 테스트 모드일 때 오늘 상장 종목이 없다면 첫 번째 종목을 임시로 활용해 테스트 가능하도록 처리할 수도 있음
         listing_today = [s for s in stocks if is_date_match(s.get("listingDate", ""), now_kst)]
+        
+        if not listing_today and test_mode and stocks:
+            print("💡 오늘 상장 종목이 없어 첫 번째 종목을 테스트용 상장 종목으로 지정합니다.")
+            listing_today = [stocks[0]]
+
         if listing_today:
             msg = [
                 "🔔 *[오늘 신규 상장 종목 알림]*",
@@ -262,13 +270,18 @@ def process_telegram_notifications(stocks, now_kst):
         else:
             print("ℹ️ 오늘 상장하는 종목이 없습니다.")
 
-    # 2. [오후 3시대(15시)] 청약 마지막 날(마감일) 종목 알림
-    elif cur_hour == 15 or (cur_hour == 16 and now_kst.minute <= 10):
+    # 2. 청약 마지막 날(마감일) 종목 알림 (시간 조건 혹은 테스트 모드)
+    if test_mode or cur_hour == 15 or (cur_hour == 16 and now_kst.minute <= 10):
         closing_today = [s for s in stocks if is_sub_closing_today(s.get("subDate", ""), now_kst)]
+        
+        if not closing_today and test_mode and stocks:
+            print("💡 오늘 청약 마감 종목이 없어 첫 번째 종목을 테스트용 청약 마감 종목으로 지정합니다.")
+            closing_today = [stocks[0]]
+
         if closing_today:
             msg = [
                 "📢 *[오늘 청약 마감(마지막 날) 종목 알림]*",
-                f"⏰ 청약 마감 1시간 전 ({now_kst.strftime('%Y-%m-%d %H:%M')})",
+                f"⏰ 청약 마감 전 ({now_kst.strftime('%Y-%m-%d %H:%M')})",
                 "⚠️ 증권사별로 마감 시간(16:00 전후)이 상이하니 서둘러 확인하세요!",
                 ""
             ]
@@ -285,9 +298,8 @@ def process_telegram_notifications(stocks, now_kst):
         else:
             print("ℹ️ 오늘 청약 마감(최종일)인 종목이 없습니다.")
 
-    # 그 외 시간대 (수동 실행 등)
-    else:
-        print(f"ℹ️ 현재 시간({now_kst.strftime('%H:%M')})은 정기 알림 시간대(08:50 / 15:00)가 아닙니다.")
+    if not test_mode and not (cur_hour in [8, 9, 15, 16]):
+        print(f"ℹ️ 현재 시간({now_kst.strftime('%H:%M')})은 정기 알림 시간대가 아닙니다.")
 
 def get_full_ipo_data():
     url = "https://www.38.co.kr/html/fund/?o=k"
@@ -355,6 +367,12 @@ def get_full_ipo_data():
 
 if __name__ == "__main__":
     print("=== 38커뮤니케이션 공모주 수집 시작 ===")
+    
+    # 💡 [텔레그램 테스트 방법]
+    # 코드를 실행할 때 아래처럼 테스트 환경변수를 활성화하면 
+    # 현재 시간(오전/오후)과 상관없이 텔레그램 메시지가 즉시 전송되는지 확인할 수 있습니다.
+    os.environ["FORCE_TELEGRAM_TEST"] = "true"  # 테스트가 끝난 후에는 "false"로 변경하거나 주석 처리를 하세요.
+
     ipo_data = get_full_ipo_data()
     
     if ipo_data:
@@ -375,7 +393,7 @@ if __name__ == "__main__":
             
         print(f"🎉 JSON 저장 완료! (기록 일시: {now_kst_str} KST)")
 
-        # 💡 시간대별 조건 알림 발송 (오전 8:50 상장 알림 / 오후 3:00 청약 마감 알림)
+        # 💡 시간대별 조건 알림 발송 (테스트 모드가 켜져 있으면 시간 관계없이 발송됨)
         process_telegram_notifications(ipo_data, now_dt)
     else:
         print("❌ 수집된 데이터가 없습니다.")
