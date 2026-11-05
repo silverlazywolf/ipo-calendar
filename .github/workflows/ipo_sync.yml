@@ -27,7 +27,11 @@ jobs:
         run: |
           pip install requests beautifulsoup4 rich urllib3
 
+      # 💡 텔레그램 시크릿 환경변수를 전달하도록 env 추가
       - name: Run collector script
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
           python ipo_collector.py
 
