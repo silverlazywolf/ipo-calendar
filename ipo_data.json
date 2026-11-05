@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-04 15:23:36",
+  "updatedAt": "2026-11-05 13:15:26",
   "totalCount": 30,
   "stocks": [
     {
@@ -271,14 +271,14 @@
     {
       "name": "에이엘로봇",
       "priceBand": "15,700~17,600원",
-      "confirmedPrice": "미정",
+      "confirmedPrice": "17,600원",
       "subscriptionRatio": "0:1",
       "underwriter": "대신증권",
       "subDate": "2026.11.06~2026.11.09",
       "refundDate": "2026.11.11",
       "listingDate": "미정",
-      "institutionalRatio": "0:1",
-      "lockupRatio": "0.00%",
+      "institutionalRatio": "871.74:1",
+      "lockupRatio": "1.13%",
       "no": "2331",
       "url": "https://www.38.co.kr/html/fund/?o=v&no=2331&l=&page=1"
     },
@@ -314,7 +314,7 @@
       "name": "넥스아이",
       "priceBand": "10,500~13,000원",
       "confirmedPrice": "8,000원",
-      "subscriptionRatio": "0:1",
+      "subscriptionRatio": "13.26:1",
       "underwriter": "한국투자증권",
       "subDate": "2026.11.03~2026.11.04",
       "refundDate": "2026.11.06",
