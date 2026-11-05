@@ -64,7 +64,6 @@ def parse_detail_page_robust(session, detail_url, default_name):
 
         soup = BeautifulSoup(res.text, 'html.parser')
 
-        # 테이블 행 순회하며 희망공모가와 확정공모가 모두 독립적으로 수집
         for tr in soup.find_all('tr'):
             tds = tr.find_all(['td', 'th'])
             texts = [clean_text(td.text) for td in tds]
@@ -141,7 +140,7 @@ def parse_detail_page_robust(session, detail_url, default_name):
     return detail_info
 
 def print_vscode_preview(stocks):
-    """VS Code 터미널 프리뷰 출력 (희망공모가와 확정공모가 동시 표시)"""
+    """VS Code 터미널 프리뷰 출력"""
     print("\n" + "=" * 130)
     print(f" 🚀 38커뮤니케이션 공모주 수집 결과 프리뷰 (총 {len(stocks)}개 종목)")
     print("=" * 130)
@@ -185,6 +184,67 @@ def print_vscode_preview(stocks):
             print(f"{item['no']:<6} | {item['name']:<12} | {item['priceBand']:<16} | {item['confirmedPrice']:<12} | {item['subDate']:<11} | {item['listingDate']:<6} | {item['institutionalRatio']:<10} | {item['lockupRatio']:<6} | {item['underwriter']}")
 
     print("=" * 130 + "\n")
+
+# 💡 텔레그램 상장 알림 발송 함수
+def send_telegram_alert(stocks, now_kst):
+    token = os.environ.get("TELEGRAM_BOT_TOKEN")
+    chat_id = os.environ.get("TELEGRAM_CHAT_ID")
+    
+    if not token or not chat_id:
+        print("ℹ️ 텔레그램 설정(TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID)이 없어 알림 발송을 건너뜁니다.")
+        return
+
+    # 오늘 날짜를 다양한 날짜 포맷으로 생성
+    today_formats = [
+        now_kst.strftime("%Y.%m.%d"),
+        now_kst.strftime("%Y-%m-%d"),
+        now_kst.strftime("%Y/%m/%d"),
+        f"{now_kst.year}.{now_kst.month}.{now_kst.day}" # 한자리 월/일 대응
+    ]
+
+    listing_today = []
+    for s in stocks:
+        l_date = (s.get("listingDate") or "").strip()
+        if any(f in l_date for f in today_formats):
+            listing_today.append(s)
+
+    if not listing_today:
+        print(f"ℹ️ 오늘({now_kst.strftime('%Y-%m-%d')}) 상장 종목이 없습니다.")
+        return
+
+    # 메시지 작성
+    msg_lines = [
+        f"🔔 *[오늘 상장 종목 알림]*",
+        f"📅 기준일시: {now_kst.strftime('%Y-%m-%d %H:%M')} (KST)",
+        ""
+    ]
+    for s in listing_today:
+        msg_lines.append(f"📌 *{s['name']}*")
+        msg_lines.append(f"• 확정공모가: `{s.get('confirmedPrice', '미정')}`")
+        msg_lines.append(f"• 기관경쟁률: `{s.get('institutionalRatio', '0:1')}`")
+        msg_lines.append(f"• 의무보유확약: `{s.get('lockupRatio', '0.0%')}`")
+        msg_lines.append(f"• 주관사: {s.get('underwriter', '미확인')}")
+        if s.get("url"):
+            msg_lines.append(f"• [38커뮤니케이션 바로가기]({s['url']})")
+        msg_lines.append("")
+
+    text = "\n".join(msg_lines)
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    payload = {
+        "chat_id": chat_id,
+        "text": text,
+        "parse_mode": "Markdown",
+        "disable_web_page_preview": True
+    }
+
+    try:
+        res = requests.post(url, json=payload, timeout=10)
+        if res.status_code == 200:
+            print("🚀 텔레그램 상장 알림 전송 완료!")
+        else:
+            print(f"⚠️ 텔레그램 전송 실패 ({res.status_code}): {res.text}")
+    except Exception as e:
+        print(f"⚠️ 텔레그램 발송 중 예외 발생: {e}")
 
 def get_full_ipo_data():
     url = "https://www.38.co.kr/html/fund/?o=k"
@@ -257,7 +317,7 @@ def get_full_ipo_data():
             detail_data["url"] = item["url"]
             results.append(detail_data)
             
-            # 💡 대상 서버 차단 방지를 위한 미세 랜덤 지연 (0.3초 ~ 0.7초)
+            # 차단 방지를 위한 미세 지연
             time.sleep(random.uniform(0.3, 0.7))
 
         return results
@@ -273,8 +333,8 @@ if __name__ == "__main__":
     if ipo_data:
         print_vscode_preview(ipo_data)
         
-        # 💡 GitHub Actions 환경(UTC)에서도 무조건 한국 표준시(KST)로 저장되도록 설정
-        now_kst = datetime.now(KST).strftime("%Y-%m-%d %H:%M:%S")
+        now_dt = datetime.now(KST)
+        now_kst = now_dt.strftime("%Y-%m-%d %H:%M:%S")
         
         output = {
             "updatedAt": now_kst,
@@ -287,5 +347,8 @@ if __name__ == "__main__":
             json.dump(output, f, ensure_ascii=False, indent=2)
             
         print(f"🎉 총 {len(ipo_data)}개 종목 데이터 수집 완료 및 {output_path} 저장 성공! (기록 일시: {now_kst} KST)")
+
+        # 💡 상장일이 오늘인 종목이 있다면 텔레그램 알림 발송
+        send_telegram_alert(ipo_data, now_dt)
     else:
         print("❌ 수집된 데이터가 없습니다.")
