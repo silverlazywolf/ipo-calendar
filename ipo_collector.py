@@ -178,57 +178,36 @@ def print_vscode_preview(stocks):
         console.print(table)
 
     except ImportError:
-        print(f"{'No':<6} | {'종목명':<12} | {'희망공모가(밴드)':<16} | {'확정공모가':<12} | {'청약일':<11} | {'상장일':<6} | {'기관경쟁률':<10} | {'확약':<6} | {'주간사'}")
-        print("-" * 130)
         for item in stocks:
-            print(f"{item['no']:<6} | {item['name']:<12} | {item['priceBand']:<16} | {item['confirmedPrice']:<12} | {item['subDate']:<11} | {item['listingDate']:<6} | {item['institutionalRatio']:<10} | {item['lockupRatio']:<6} | {item['underwriter']}")
+            print(item)
 
     print("=" * 130 + "\n")
 
-# 💡 텔레그램 상장 알림 발송 함수
-def send_telegram_alert(stocks, now_kst):
-    token = os.environ.get("TELEGRAM_BOT_TOKEN")
-    chat_id = os.environ.get("TELEGRAM_CHAT_ID")
-    
-    if not token or not chat_id:
-        print("ℹ️ 텔레그램 설정(TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID)이 없어 알림 발송을 건너뜁니다.")
-        return
-
-    # 오늘 날짜를 다양한 날짜 포맷으로 생성
-    today_formats = [
-        now_kst.strftime("%Y.%m.%d"),
-        now_kst.strftime("%Y-%m-%d"),
-        now_kst.strftime("%Y/%m/%d"),
-        f"{now_kst.year}.{now_kst.month}.{now_kst.day}" # 한자리 월/일 대응
+def is_date_match(target_str, dt_obj):
+    """문자열 날짜와 datetime 객체가 동일한 날짜인지 검사"""
+    if not target_str or target_str == "미정":
+        return False
+    formats = [
+        dt_obj.strftime("%Y.%m.%d"),
+        dt_obj.strftime("%Y-%m-%d"),
+        dt_obj.strftime("%Y/%m/%d"),
+        f"{dt_obj.year}.{dt_obj.month}.{dt_obj.day}"
     ]
+    return any(f in target_str for f in formats)
 
-    listing_today = []
-    for s in stocks:
-        l_date = (s.get("listingDate") or "").strip()
-        if any(f in l_date for f in today_formats):
-            listing_today.append(s)
+def is_sub_closing_today(sub_date_str, dt_obj):
+    """오늘이 공모청약 마지막 날인지 판별"""
+    if not sub_date_str or sub_date_str == "미정":
+        return False
+    # 기간 형태 (예: 2026.11.03~2026.11.04)
+    if "~" in sub_date_str:
+        end_part = sub_date_str.split("~")[-1].strip()
+        return is_date_match(end_part, dt_obj)
+    # 단일 날짜인 경우
+    return is_date_match(sub_date_str, dt_obj)
 
-    if not listing_today:
-        print(f"ℹ️ 오늘({now_kst.strftime('%Y-%m-%d')}) 상장 종목이 없습니다.")
-        return
-
-    # 메시지 작성
-    msg_lines = [
-        f"🔔 *[오늘 상장 종목 알림]*",
-        f"📅 기준일시: {now_kst.strftime('%Y-%m-%d %H:%M')} (KST)",
-        ""
-    ]
-    for s in listing_today:
-        msg_lines.append(f"📌 *{s['name']}*")
-        msg_lines.append(f"• 확정공모가: `{s.get('confirmedPrice', '미정')}`")
-        msg_lines.append(f"• 기관경쟁률: `{s.get('institutionalRatio', '0:1')}`")
-        msg_lines.append(f"• 의무보유확약: `{s.get('lockupRatio', '0.0%')}`")
-        msg_lines.append(f"• 주관사: {s.get('underwriter', '미확인')}")
-        if s.get("url"):
-            msg_lines.append(f"• [38커뮤니케이션 바로가기]({s['url']})")
-        msg_lines.append("")
-
-    text = "\n".join(msg_lines)
+def send_telegram_msg(token, chat_id, text):
+    """텔레그램 메시지 전송 공통 함수"""
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     payload = {
         "chat_id": chat_id,
@@ -236,15 +215,79 @@ def send_telegram_alert(stocks, now_kst):
         "parse_mode": "Markdown",
         "disable_web_page_preview": True
     }
-
     try:
         res = requests.post(url, json=payload, timeout=10)
         if res.status_code == 200:
-            print("🚀 텔레그램 상장 알림 전송 완료!")
+            print("🚀 텔레그램 알림 전송 완료!")
         else:
             print(f"⚠️ 텔레그램 전송 실패 ({res.status_code}): {res.text}")
     except Exception as e:
-        print(f"⚠️ 텔레그램 발송 중 예외 발생: {e}")
+        print(f"⚠️ 텔레그램 발송 오류: {e}")
+
+def process_telegram_notifications(stocks, now_kst):
+    """시간대별 맞춤 알림 발송: 
+       - 오전 8시경: 오늘 신규 상장 종목 알림
+       - 오후 3시(15시)경: 오늘 청약 마감(마지막 날) 종목 알림
+    """
+    token = os.environ.get("TELEGRAM_BOT_TOKEN")
+    chat_id = os.environ.get("TELEGRAM_CHAT_ID")
+    
+    if not token or not chat_id:
+        print("ℹ️ 텔레그램 환경변수(TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID)가 없어 알림을 건너뜁니다.")
+        return
+
+    cur_hour = now_kst.hour
+    print(f"⏰ 알림 조건 확인 (현재 KST 시간: {now_kst.strftime('%H:%M')})")
+
+    # 1. [오전 8시대 또는 9시 직전] 오늘 상장 종목 알림 (장 시작 전)
+    # (수동 실행 시에도 테스트 가능하도록 조건 처리)
+    if cur_hour == 8 or (cur_hour == 9 and now_kst.minute <= 10):
+        listing_today = [s for s in stocks if is_date_match(s.get("listingDate", ""), now_kst)]
+        if listing_today:
+            msg = [
+                "🔔 *[오늘 신규 상장 종목 알림]*",
+                f"📅 일시: {now_kst.strftime('%Y-%m-%d')} 장 시작 전",
+                ""
+            ]
+            for s in listing_today:
+                msg.append(f"📌 *{s['name']}* (오늘 상장)")
+                msg.append(f"• 확정공모가: `{s.get('confirmedPrice', '미정')}`")
+                msg.append(f"• 기관경쟁률: `{s.get('institutionalRatio', '0:1')}`")
+                msg.append(f"• 의무보유확약: `{s.get('lockupRatio', '0.0%')}`")
+                msg.append(f"• 주관사: {s.get('underwriter', '미확인')}")
+                if s.get("url"):
+                    msg.append(f"• [38커뮤니케이션 바로가기]({s['url']})")
+                msg.append("")
+            send_telegram_msg(token, chat_id, "\n".join(msg))
+        else:
+            print("ℹ️ 오늘 상장하는 종목이 없습니다.")
+
+    # 2. [오후 3시대(15시)] 청약 마지막 날(마감일) 종목 알림
+    elif cur_hour == 15 or (cur_hour == 16 and now_kst.minute <= 10):
+        closing_today = [s for s in stocks if is_sub_closing_today(s.get("subDate", ""), now_kst)]
+        if closing_today:
+            msg = [
+                "📢 *[오늘 청약 마감(마지막 날) 종목 알림]*",
+                f"⏰ 청약 마감 1시간 전 ({now_kst.strftime('%Y-%m-%d %H:%M')})",
+                "⚠️ 증권사별로 마감 시간(16:00 전후)이 상이하니 서둘러 확인하세요!",
+                ""
+            ]
+            for s in closing_today:
+                msg.append(f"📌 *{s['name']}* (청약 최종일)")
+                msg.append(f"• 확정공모가: `{s.get('confirmedPrice', '미정')}`")
+                msg.append(f"• 청약경쟁률: `{s.get('subscriptionRatio', '0:1')}`")
+                msg.append(f"• 주관사: {s.get('underwriter', '미확인')}")
+                msg.append(f"• 환불일: {s.get('refundDate', '미정')}")
+                if s.get("url"):
+                    msg.append(f"• [38커뮤니케이션 바로가기]({s['url']})")
+                msg.append("")
+            send_telegram_msg(token, chat_id, "\n".join(msg))
+        else:
+            print("ℹ️ 오늘 청약 마감(최종일)인 종목이 없습니다.")
+
+    # 그 외 시간대 (수동 실행 등)
+    else:
+        print(f"ℹ️ 현재 시간({now_kst.strftime('%H:%M')})은 정기 알림 시간대(08:50 / 15:00)가 아닙니다.")
 
 def get_full_ipo_data():
     url = "https://www.38.co.kr/html/fund/?o=k"
@@ -260,13 +303,10 @@ def get_full_ipo_data():
     try:
         response = session.get(url, headers=headers, timeout=15, verify=False)
         response.encoding = 'euc-kr'
-        
         if response.status_code != 200:
-            print(f"❌ 목록 페이지 접속 실패 (Status: {response.status_code})")
             return []
 
         soup = BeautifulSoup(response.text, 'html.parser')
-        
         seen_no = set()
         seen_names = set()
         ipo_list = []
@@ -277,11 +317,7 @@ def get_full_ipo_data():
                 match_no = re.search(r'no=(\d+)', href)
                 if match_no:
                     no_val = match_no.group(1)
-                    
-                    if int(no_val) >= 3000:
-                        continue
-
-                    if no_val in seen_no:
+                    if int(no_val) >= 3000 or no_val in seen_no:
                         continue
                     seen_no.add(no_val)
 
@@ -301,27 +337,18 @@ def get_full_ipo_data():
                         else:
                             full_detail_url = f"https://www.38.co.kr/html/fund/{href}"
 
-                        ipo_list.append({
-                            "no": no_val,
-                            "name": corp_name,
-                            "url": full_detail_url
-                        })
-
-        print(f"✅ 유효 종목 {len(ipo_list)}개 발견. 상세 페이지 파싱 시작...\n")
+                        ipo_list.append({"no": no_val, "name": corp_name, "url": full_detail_url})
 
         results = []
         for idx, item in enumerate(ipo_list, 1):
-            print(f"[{idx}/{len(ipo_list)}] {item['name']} (no={item['no']}) 파싱 중...")
+            print(f"[{idx}/{len(ipo_list)}] {item['name']} 파싱 중...")
             detail_data = parse_detail_page_robust(session, item["url"], item["name"])
             detail_data["no"] = item["no"]
             detail_data["url"] = item["url"]
             results.append(detail_data)
-            
-            # 차단 방지를 위한 미세 지연
             time.sleep(random.uniform(0.3, 0.7))
 
         return results
-
     except Exception as e:
         print(f"⚠️ 메인 크롤링 에러: {e}")
         return []
@@ -334,10 +361,10 @@ if __name__ == "__main__":
         print_vscode_preview(ipo_data)
         
         now_dt = datetime.now(KST)
-        now_kst = now_dt.strftime("%Y-%m-%d %H:%M:%S")
+        now_kst_str = now_dt.strftime("%Y-%m-%d %H:%M:%S")
         
         output = {
-            "updatedAt": now_kst,
+            "updatedAt": now_kst_str,
             "totalCount": len(ipo_data),
             "stocks": ipo_data
         }
@@ -346,9 +373,9 @@ if __name__ == "__main__":
         with open(output_path, "w", encoding="utf-8") as f:
             json.dump(output, f, ensure_ascii=False, indent=2)
             
-        print(f"🎉 총 {len(ipo_data)}개 종목 데이터 수집 완료 및 {output_path} 저장 성공! (기록 일시: {now_kst} KST)")
+        print(f"🎉 JSON 저장 완료! (기록 일시: {now_kst_str} KST)")
 
-        # 💡 상장일이 오늘인 종목이 있다면 텔레그램 알림 발송
-        send_telegram_alert(ipo_data, now_dt)
+        # 💡 시간대별 조건 알림 발송 (오전 8:50 상장 알림 / 오후 3:00 청약 마감 알림)
+        process_telegram_notifications(ipo_data, now_dt)
     else:
         print("❌ 수집된 데이터가 없습니다.")
