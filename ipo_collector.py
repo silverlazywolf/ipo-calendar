@@ -223,7 +223,13 @@ def send_telegram_msg(token, chat_id, text):
         print(f"⚠️ 텔레그램 발송 오류: {e}")
 
 def process_telegram_notifications(stocks, now_kst):
-    """시간대별 맞춤 알림 발송 (유연한 시간 체크 적용)"""
+    """시간대별 맞춤 알림 발송 (수동 실행 시 자동 건너뜀)"""
+    # 💡 깃허브 액션에서 수동 실행(workflow_dispatch)된 경우 알림을 보내지 않음
+    event_name = os.environ.get("EVENT_NAME", "")
+    if event_name == "workflow_dispatch":
+        print("ℹ️ 수동 실행(workflow_dispatch) 감지됨: 텔레그램 알림을 발송하지 않고 건너뜁니다.")
+        return
+
     token = os.environ.get("TELEGRAM_BOT_TOKEN")
     chat_id = os.environ.get("TELEGRAM_CHAT_ID")
     
@@ -244,7 +250,6 @@ def process_telegram_notifications(stocks, now_kst):
         listing_today = [s for s in stocks if is_date_match(s.get("listingDate", ""), now_kst)]
         
         if not listing_today and test_mode and stocks:
-            print("💡 오늘 상장 종목이 없어 첫 번째 종목을 테스트용 상장 종목으로 지정합니다.")
             listing_today = [stocks[0]]
 
         if listing_today:
@@ -271,7 +276,6 @@ def process_telegram_notifications(stocks, now_kst):
         closing_today = [s for s in stocks if is_sub_closing_today(s.get("subDate", ""), now_kst)]
         
         if not closing_today and test_mode and stocks:
-            print("💡 오늘 청약 마감 종목이 없어 첫 번째 종목을 테스트용 청약 마감 종목으로 지정합니다.")
             closing_today = [stocks[0]]
 
         if closing_today:
@@ -364,7 +368,6 @@ def get_full_ipo_data():
 if __name__ == "__main__":
     print("=== 38커뮤니케이션 공모주 수집 시작 ===")
     
-    # 💡 텔레그램 테스트가 필요할 때는 "true"로 설정하고, 평소 자동화 운영 시에는 "false"로 변경하거나 주석 처리하세요.
     os.environ["FORCE_TELEGRAM_TEST"] = "false"
 
     ipo_data = get_full_ipo_data()
@@ -387,7 +390,7 @@ if __name__ == "__main__":
             
         print(f"🎉 JSON 저장 완료! (기록 일시: {now_kst_str} KST)")
 
-        # 💡 시간대별 조건 알림 발송
+        # 💡 시간대별 조건 알림 발송 (수동 실행 시 자동 차단됨)
         process_telegram_notifications(ipo_data, now_dt)
     else:
         print("❌ 수집된 데이터가 없습니다.")
