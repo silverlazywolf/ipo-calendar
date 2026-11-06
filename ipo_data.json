@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-06 12:43:49",
+  "updatedAt": "2026-11-06 21:59:50",
   "totalCount": 30,
   "stocks": [
     {
@@ -286,7 +286,7 @@
       "name": "옵토닉스",
       "priceBand": "10,000~12,000원",
       "confirmedPrice": "12,000원",
-      "subscriptionRatio": "0:1",
+      "subscriptionRatio": "1343.32:1",
       "underwriter": "한국투자증권",
       "subDate": "2026.11.05~2026.11.06",
       "refundDate": "2026.11.10",
