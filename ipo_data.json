@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-09 12:03:02",
+  "updatedAt": "2026-11-09 22:57:04",
   "totalCount": 30,
   "stocks": [
     {
@@ -257,14 +257,14 @@
     {
       "name": "하나에어로다이내믹스",
       "priceBand": "4,700~5,700원",
-      "confirmedPrice": "미정",
+      "confirmedPrice": "5,700원",
       "subscriptionRatio": "0:1",
       "underwriter": "IBK투자증권",
       "subDate": "2026.11.10~2026.11.11",
       "refundDate": "2026.11.13",
-      "listingDate": "미정",
-      "institutionalRatio": "0:1",
-      "lockupRatio": "0.00%",
+      "listingDate": "2026.11.20",
+      "institutionalRatio": "1051.38:1",
+      "lockupRatio": "4.16%",
       "no": "2334",
       "url": "https://www.38.co.kr/html/fund/?o=v&no=2334&l=&page=1"
     },
@@ -272,11 +272,11 @@
       "name": "에이엘로봇",
       "priceBand": "15,700~17,600원",
       "confirmedPrice": "17,600원",
-      "subscriptionRatio": "0:1",
+      "subscriptionRatio": "834.73:1",
       "underwriter": "대신증권",
       "subDate": "2026.11.06~2026.11.09",
       "refundDate": "2026.11.11",
-      "listingDate": "미정",
+      "listingDate": "2026.11.18",
       "institutionalRatio": "871.74:1",
       "lockupRatio": "1.13%",
       "no": "2331",
