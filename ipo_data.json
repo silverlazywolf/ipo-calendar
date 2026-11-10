@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-10 13:50:28",
+  "updatedAt": "2026-11-10 22:30:25",
   "totalCount": 30,
   "stocks": [
     {
@@ -57,6 +57,20 @@
       "lockupRatio": "0.00%",
       "no": "2353",
       "url": "https://www.38.co.kr/html/fund/?o=v&no=2353&l=&page=1"
+    },
+    {
+      "name": "마더스제약",
+      "priceBand": "11,000~14,500원",
+      "confirmedPrice": "미정",
+      "subscriptionRatio": "0:1",
+      "underwriter": "KB증권,NH투자증권",
+      "subDate": "2026.12.08~2026.12.09",
+      "refundDate": "2026.12.11",
+      "listingDate": "미정",
+      "institutionalRatio": "0:1",
+      "lockupRatio": "0.00%",
+      "no": "2359",
+      "url": "https://www.38.co.kr/html/fund/?o=v&no=2359&l=&page=1"
     },
     {
       "name": "이노보테라퓨틱스",
@@ -215,12 +229,12 @@
     {
       "name": "엠비디",
       "priceBand": "9,600~11,700원",
-      "confirmedPrice": "미정",
+      "confirmedPrice": "7,000원",
       "subscriptionRatio": "0:1",
       "underwriter": "하나증권",
       "subDate": "2026.11.12~2026.11.13",
       "refundDate": "2026.11.17",
-      "listingDate": "미정",
+      "listingDate": "2026.11.24",
       "institutionalRatio": "0:1",
       "lockupRatio": "0.00%",
       "no": "2321",
@@ -407,20 +421,6 @@
       "lockupRatio": "0.87%",
       "no": "2333",
       "url": "https://www.38.co.kr/html/fund/?o=v&no=2333&l=&page=1"
-    },
-    {
-      "name": "인텔리빅스",
-      "priceBand": "7,600~9,000원",
-      "confirmedPrice": "9,000원",
-      "subscriptionRatio": "1410.87:1",
-      "underwriter": "미래에셋증권",
-      "subDate": "2026.10.21~2026.10.22",
-      "refundDate": "2026.10.26",
-      "listingDate": "2026.10.30",
-      "institutionalRatio": "1234.30:1",
-      "lockupRatio": "6.14%",
-      "no": "2328",
-      "url": "https://www.38.co.kr/html/fund/?o=v&no=2328&l=&page=1"
     }
   ]
 }
