@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-11 12:08:51",
+  "updatedAt": "2026-11-11 21:45:33",
   "totalCount": 30,
   "stocks": [
     {
@@ -241,38 +241,10 @@
       "url": "https://www.38.co.kr/html/fund/?o=v&no=2321&l=&page=1"
     },
     {
-      "name": "씨앤엠",
-      "priceBand": "10,000~13,000원",
-      "confirmedPrice": "미정",
-      "subscriptionRatio": "0:1",
-      "underwriter": "한국투자증권",
-      "subDate": "2026.11.12~2026.11.13",
-      "refundDate": "2026.11.17",
-      "listingDate": "미정",
-      "institutionalRatio": "0:1",
-      "lockupRatio": "0.00%",
-      "no": "2346",
-      "url": "https://www.38.co.kr/html/fund/?o=v&no=2346&l=&page=1"
-    },
-    {
-      "name": "제이앤티지",
-      "priceBand": "26,400~31,900원",
-      "confirmedPrice": "미정",
-      "subscriptionRatio": "0:1",
-      "underwriter": "대신증권,NH투자증권",
-      "subDate": "2026.11.12~2026.11.13",
-      "refundDate": "2026.11.17",
-      "listingDate": "미정",
-      "institutionalRatio": "0:1",
-      "lockupRatio": "0.00%",
-      "no": "2347",
-      "url": "https://www.38.co.kr/html/fund/?o=v&no=2347&l=&page=1"
-    },
-    {
       "name": "하나에어로다이내믹스",
       "priceBand": "4,700~5,700원",
       "confirmedPrice": "5,700원",
-      "subscriptionRatio": "0:1",
+      "subscriptionRatio": "1851.14:1",
       "underwriter": "IBK투자증권",
       "subDate": "2026.11.10~2026.11.11",
       "refundDate": "2026.11.13",
@@ -421,6 +393,34 @@
       "lockupRatio": "0.87%",
       "no": "2333",
       "url": "https://www.38.co.kr/html/fund/?o=v&no=2333&l=&page=1"
+    },
+    {
+      "name": "인텔리빅스",
+      "priceBand": "7,600~9,000원",
+      "confirmedPrice": "9,000원",
+      "subscriptionRatio": "1410.87:1",
+      "underwriter": "미래에셋증권",
+      "subDate": "2026.10.21~2026.10.22",
+      "refundDate": "2026.10.26",
+      "listingDate": "2026.10.30",
+      "institutionalRatio": "1234.30:1",
+      "lockupRatio": "6.14%",
+      "no": "2328",
+      "url": "https://www.38.co.kr/html/fund/?o=v&no=2328&l=&page=1"
+    },
+    {
+      "name": "티앤이코리아",
+      "priceBand": "12,600~15,300원",
+      "confirmedPrice": "15,300원",
+      "subscriptionRatio": "1253.39:1",
+      "underwriter": "신한투자증권",
+      "subDate": "2026.10.20~2026.10.21",
+      "refundDate": "2026.10.23",
+      "listingDate": "2026.10.29",
+      "institutionalRatio": "1041.02:1",
+      "lockupRatio": "29.52%",
+      "no": "2322",
+      "url": "https://www.38.co.kr/html/fund/?o=v&no=2322&l=&page=1"
     }
   ]
 }
