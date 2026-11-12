@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-11 22:20:00",
+  "updatedAt": "2026-11-12 13:23:19",
   "totalCount": 30,
   "stocks": [
     {
@@ -59,6 +59,20 @@
       "url": "https://www.38.co.kr/html/fund/?o=v&no=2353&l=&page=1"
     },
     {
+      "name": "다비오",
+      "priceBand": "12,300~16,600원",
+      "confirmedPrice": "미정",
+      "subscriptionRatio": "0:1",
+      "underwriter": "대신증권",
+      "subDate": "2026.12.09~2026.12.10",
+      "refundDate": "2026.12.14",
+      "listingDate": "미정",
+      "institutionalRatio": "0:1",
+      "lockupRatio": "0.00%",
+      "no": "2358",
+      "url": "https://www.38.co.kr/html/fund/?o=v&no=2358&l=&page=1"
+    },
+    {
       "name": "마더스제약",
       "priceBand": "11,000~14,500원",
       "confirmedPrice": "미정",
@@ -113,20 +127,6 @@
       "lockupRatio": "0.00%",
       "no": "2343",
       "url": "https://www.38.co.kr/html/fund/?o=v&no=2343&l=&page=1"
-    },
-    {
-      "name": "다비오",
-      "priceBand": "12,300~16,600원",
-      "confirmedPrice": "미정",
-      "subscriptionRatio": "0:1",
-      "underwriter": "대신증권",
-      "subDate": "2026.12.01~2026.12.02",
-      "refundDate": "2026.12.04",
-      "listingDate": "미정",
-      "institutionalRatio": "0:1",
-      "lockupRatio": "0.00%",
-      "no": "2358",
-      "url": "https://www.38.co.kr/html/fund/?o=v&no=2358&l=&page=1"
     },
     {
       "name": "에이엔에이치스트럭쳐",
@@ -192,7 +192,7 @@
       "underwriter": "삼성증권,미래에셋증권",
       "subDate": "2026.11.23~2026.11.24",
       "refundDate": "2026.11.26",
-      "listingDate": "미정",
+      "listingDate": "2026.12.02",
       "institutionalRatio": "0:1",
       "lockupRatio": "0.00%",
       "no": "2345",
@@ -206,7 +206,7 @@
       "underwriter": "미래에셋증권,한국투자증권,삼성증권",
       "subDate": "2026.11.18~2026.11.19",
       "refundDate": "2026.11.23",
-      "listingDate": "미정",
+      "listingDate": "2026.11.27",
       "institutionalRatio": "0:1",
       "lockupRatio": "0.00%",
       "no": "2349",
@@ -220,7 +220,7 @@
       "underwriter": "유진투자증권,신영증권",
       "subDate": "2026.11.18~2026.11.19",
       "refundDate": "2026.11.23",
-      "listingDate": "미정",
+      "listingDate": "2026.11.30",
       "institutionalRatio": "0:1",
       "lockupRatio": "0.00%",
       "no": "2352",
