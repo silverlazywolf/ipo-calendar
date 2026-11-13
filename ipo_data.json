@@ -1,7 +1,21 @@
 {
-  "updatedAt": "2026-11-13 12:40:48",
+  "updatedAt": "2026-11-13 22:09:53",
   "totalCount": 30,
   "stocks": [
+    {
+      "name": "제논",
+      "priceBand": "9,700~12,200원",
+      "confirmedPrice": "미정",
+      "subscriptionRatio": "0:1",
+      "underwriter": "삼성증권",
+      "subDate": "2026.12.14~2026.12.15",
+      "refundDate": "2026.12.17",
+      "listingDate": "미정",
+      "institutionalRatio": "0:1",
+      "lockupRatio": "0.00%",
+      "no": "2341",
+      "url": "https://www.38.co.kr/html/fund/?o=v&no=2341&l=&page=1"
+    },
     {
       "name": "태석광학",
       "priceBand": "17,500~20,200원",
@@ -157,20 +171,6 @@
       "url": "https://www.38.co.kr/html/fund/?o=v&no=2350&l=&page=1"
     },
     {
-      "name": "제논",
-      "priceBand": "9,700~12,200원",
-      "confirmedPrice": "미정",
-      "subscriptionRatio": "0:1",
-      "underwriter": "삼성증권",
-      "subDate": "2026.11.24~2026.11.25",
-      "refundDate": "2026.11.27",
-      "listingDate": "미정",
-      "institutionalRatio": "0:1",
-      "lockupRatio": "0.00%",
-      "no": "2341",
-      "url": "https://www.38.co.kr/html/fund/?o=v&no=2341&l=&page=1"
-    },
-    {
       "name": "케이엠에프",
       "priceBand": "15,000~17,800원",
       "confirmedPrice": "미정",
@@ -244,7 +244,7 @@
       "name": "엠비디",
       "priceBand": "9,600~11,700원",
       "confirmedPrice": "7,000원",
-      "subscriptionRatio": "0:1",
+      "subscriptionRatio": "172:1",
       "underwriter": "하나증권",
       "subDate": "2026.11.12~2026.11.13",
       "refundDate": "2026.11.17",
@@ -340,15 +340,15 @@
     },
     {
       "name": "동원파츠",
-      "priceBand": "미정",
-      "confirmedPrice": "미정",
-      "subscriptionRatio": "0:1",
-      "underwriter": "미확인",
-      "subDate": "미정",
-      "refundDate": "미정",
-      "listingDate": "미정",
-      "institutionalRatio": "0:1",
-      "lockupRatio": "0.0%",
+      "priceBand": "23,000~26,500원",
+      "confirmedPrice": "26,500원",
+      "subscriptionRatio": "1219.37:1",
+      "underwriter": "삼성증권",
+      "subDate": "2026.11.02~2026.11.03",
+      "refundDate": "2026.11.05",
+      "listingDate": "2026.11.10",
+      "institutionalRatio": "840.86:1",
+      "lockupRatio": "16.61%",
       "no": "2339",
       "url": "https://www.38.co.kr/html/fund/?o=v&no=2339&l=&page=1"
     },
