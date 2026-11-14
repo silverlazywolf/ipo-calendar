@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-14 21:15:06",
+  "updatedAt": "2026-11-14 21:48:07",
   "totalCount": 30,
   "stocks": [
     {
@@ -256,15 +256,15 @@
     },
     {
       "name": "하나에어로다이내믹스",
-      "priceBand": "미정",
-      "confirmedPrice": "미정",
-      "subscriptionRatio": "0:1",
-      "underwriter": "미확인",
-      "subDate": "미정",
-      "refundDate": "미정",
-      "listingDate": "미정",
-      "institutionalRatio": "0:1",
-      "lockupRatio": "0.0%",
+      "priceBand": "4,700~5,700원",
+      "confirmedPrice": "5,700원",
+      "subscriptionRatio": "1851.14:1",
+      "underwriter": "IBK투자증권",
+      "subDate": "2026.11.10~2026.11.11",
+      "refundDate": "2026.11.13",
+      "listingDate": "2026.11.20",
+      "institutionalRatio": "1051.38:1",
+      "lockupRatio": "4.16%",
       "no": "2334",
       "url": "https://www.38.co.kr/html/fund/?o=v&no=2334&l=&page=1"
     },
