@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-18 00:18:14",
+  "updatedAt": "2026-11-18 08:41:58",
   "totalCount": 30,
   "stocks": [
     {
@@ -270,15 +270,15 @@
     },
     {
       "name": "에이엘로봇",
-      "priceBand": "미정",
-      "confirmedPrice": "미정",
-      "subscriptionRatio": "0:1",
-      "underwriter": "미확인",
-      "subDate": "미정",
-      "refundDate": "미정",
-      "listingDate": "미정",
-      "institutionalRatio": "0:1",
-      "lockupRatio": "0.0%",
+      "priceBand": "15,700~17,600원",
+      "confirmedPrice": "17,600원",
+      "subscriptionRatio": "834.73:1",
+      "underwriter": "대신증권",
+      "subDate": "2026.11.06~2026.11.09",
+      "refundDate": "2026.11.11",
+      "listingDate": "2026.11.18",
+      "institutionalRatio": "871.74:1",
+      "lockupRatio": "1.13%",
       "no": "2331",
       "url": "https://www.38.co.kr/html/fund/?o=v&no=2331&l=&page=1"
     },
