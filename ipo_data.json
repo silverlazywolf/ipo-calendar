@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-16 23:26:04",
+  "updatedAt": "2026-11-17 14:17:06",
   "totalCount": 30,
   "stocks": [
     {
@@ -50,8 +50,8 @@
       "confirmedPrice": "미정",
       "subscriptionRatio": "0:1",
       "underwriter": "한국투자증권",
-      "subDate": "2026.12.14~2026.12.15",
-      "refundDate": "2026.12.17",
+      "subDate": "2026.12.11~2026.12.14",
+      "refundDate": "2026.12.16",
       "listingDate": "미정",
       "institutionalRatio": "0:1",
       "lockupRatio": "0.00%",
