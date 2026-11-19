@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-19 13:35:45",
+  "updatedAt": "2026-11-19 23:28:53",
   "totalCount": 30,
   "stocks": [
     {
@@ -116,15 +116,15 @@
     },
     {
       "name": "다비오",
-      "priceBand": "미정",
+      "priceBand": "12,300~16,600원",
       "confirmedPrice": "미정",
       "subscriptionRatio": "0:1",
-      "underwriter": "미확인",
-      "subDate": "미정",
-      "refundDate": "미정",
+      "underwriter": "대신증권",
+      "subDate": "2026.12.09~2026.12.10",
+      "refundDate": "2026.12.14",
       "listingDate": "미정",
       "institutionalRatio": "0:1",
-      "lockupRatio": "0.0%",
+      "lockupRatio": "0.00%",
       "no": "2358",
       "url": "https://www.38.co.kr/html/fund/?o=v&no=2358&l=&page=1"
     },
