@@ -1,7 +1,21 @@
 {
-  "updatedAt": "2026-11-20 13:24:12",
-  "totalCount": 31,
+  "updatedAt": "2026-11-20 23:03:47",
+  "totalCount": 30,
   "stocks": [
+    {
+      "name": "피지티",
+      "priceBand": "18,000~20,000원",
+      "confirmedPrice": "미정",
+      "subscriptionRatio": "0:1",
+      "underwriter": "한국투자증권,유안타증권",
+      "subDate": "2026.12.17~2026.12.18",
+      "refundDate": "2026.12.22",
+      "listingDate": "미정",
+      "institutionalRatio": "0:1",
+      "lockupRatio": "0.00%",
+      "no": "2363",
+      "url": "https://www.38.co.kr/html/fund/?o=v&no=2363&l=&page=1"
+    },
     {
       "name": "이나인페이",
       "priceBand": "7,500~10,500원",
@@ -407,34 +421,6 @@
       "lockupRatio": "0.87%",
       "no": "2333",
       "url": "https://www.38.co.kr/html/fund/?o=v&no=2333&l=&page=1"
-    },
-    {
-      "name": "인텔리빅스",
-      "priceBand": "7,600~9,000원",
-      "confirmedPrice": "9,000원",
-      "subscriptionRatio": "1410.87:1",
-      "underwriter": "미래에셋증권",
-      "subDate": "2026.10.21~2026.10.22",
-      "refundDate": "2026.10.26",
-      "listingDate": "2026.10.30",
-      "institutionalRatio": "1234.30:1",
-      "lockupRatio": "6.14%",
-      "no": "2328",
-      "url": "https://www.38.co.kr/html/fund/?o=v&no=2328&l=&page=1"
-    },
-    {
-      "name": "아델",
-      "priceBand": "미정",
-      "confirmedPrice": "미정",
-      "subscriptionRatio": "0:1",
-      "underwriter": "미확인",
-      "subDate": "미정",
-      "refundDate": "미정",
-      "listingDate": "미정",
-      "institutionalRatio": "0:1",
-      "lockupRatio": "0.0%",
-      "no": "2345",
-      "url": "https://www.38.co.kr/html/fund/?o=v&no=2345"
     }
   ]
 }
