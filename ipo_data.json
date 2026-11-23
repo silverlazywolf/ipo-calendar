@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-23 13:04:42",
+  "updatedAt": "2026-11-24 01:01:03",
   "totalCount": 30,
   "stocks": [
     {
@@ -213,29 +213,15 @@
       "url": "https://www.38.co.kr/html/fund/?o=v&no=2350&l=&page=1"
     },
     {
-      "name": "케이엠에프",
-      "priceBand": "15,000~17,800원",
-      "confirmedPrice": "미정",
-      "subscriptionRatio": "0:1",
-      "underwriter": "IBK투자증권",
-      "subDate": "2026.11.24~2026.11.25",
-      "refundDate": "2026.11.27",
-      "listingDate": "미정",
-      "institutionalRatio": "0:1",
-      "lockupRatio": "0.00%",
-      "no": "2340",
-      "url": "https://www.38.co.kr/html/fund/?o=v&no=2340&l=&page=1"
-    },
-    {
       "name": "신영스팩12호",
       "priceBand": "2,000~2,000원",
-      "confirmedPrice": "미정",
+      "confirmedPrice": "2,000원",
       "subscriptionRatio": "0:1",
       "underwriter": "신영증권",
       "subDate": "2026.11.24~2026.11.25",
       "refundDate": "2026.11.27",
       "listingDate": "미정",
-      "institutionalRatio": "0:1",
+      "institutionalRatio": "1275.80:1",
       "lockupRatio": "0.00%",
       "no": "2357",
       "url": "https://www.38.co.kr/html/fund/?o=v&no=2357&l=&page=1"
@@ -421,6 +407,20 @@
       "lockupRatio": "0.87%",
       "no": "2333",
       "url": "https://www.38.co.kr/html/fund/?o=v&no=2333&l=&page=1"
+    },
+    {
+      "name": "인텔리빅스",
+      "priceBand": "7,600~9,000원",
+      "confirmedPrice": "9,000원",
+      "subscriptionRatio": "1410.87:1",
+      "underwriter": "미래에셋증권",
+      "subDate": "2026.10.21~2026.10.22",
+      "refundDate": "2026.10.26",
+      "listingDate": "2026.10.30",
+      "institutionalRatio": "1234.30:1",
+      "lockupRatio": "6.14%",
+      "no": "2328",
+      "url": "https://www.38.co.kr/html/fund/?o=v&no=2328&l=&page=1"
     }
   ]
 }
