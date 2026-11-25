@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-25 14:43:13",
+  "updatedAt": "2026-11-26 00:39:08",
   "totalCount": 30,
   "stocks": [
     {
@@ -230,7 +230,7 @@
       "name": "신영스팩12호",
       "priceBand": "2,000~2,000원",
       "confirmedPrice": "2,000원",
-      "subscriptionRatio": "0:1",
+      "subscriptionRatio": "253:1",
       "underwriter": "신영증권",
       "subDate": "2026.11.24~2026.11.25",
       "refundDate": "2026.11.27",
@@ -244,7 +244,7 @@
       "name": "유캐스트",
       "priceBand": "19,000~23,000원",
       "confirmedPrice": "19,000원",
-      "subscriptionRatio": "0:1",
+      "subscriptionRatio": "0.49:1",
       "underwriter": "유진투자증권,신영증권",
       "subDate": "2026.11.18~2026.11.19",
       "refundDate": "2026.11.23",
