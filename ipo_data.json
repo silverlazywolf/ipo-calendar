@@ -1,7 +1,21 @@
 {
-  "updatedAt": "2026-11-27 14:26:21",
+  "updatedAt": "2026-11-28 00:09:03",
   "totalCount": 30,
   "stocks": [
+    {
+      "name": "씨아이에스케미칼",
+      "priceBand": "5,000~6,000원",
+      "confirmedPrice": "미정",
+      "subscriptionRatio": "0:1",
+      "underwriter": "KB증권",
+      "subDate": "2027.01.21~2027.01.22",
+      "refundDate": "2027.01.26",
+      "listingDate": "미정",
+      "institutionalRatio": "0:1",
+      "lockupRatio": "0.00%",
+      "no": "2348",
+      "url": "https://www.38.co.kr/html/fund/?o=v&no=2348&l=&page=1"
+    },
     {
       "name": "범한메카텍(구.두산메카텍)",
       "priceBand": "22,800~28,000원",
@@ -113,20 +127,6 @@
       "lockupRatio": "0.00%",
       "no": "2356",
       "url": "https://www.38.co.kr/html/fund/?o=v&no=2356&l=&page=1"
-    },
-    {
-      "name": "씨아이에스케미칼",
-      "priceBand": "5,400~6,800원",
-      "confirmedPrice": "미정",
-      "subscriptionRatio": "0:1",
-      "underwriter": "KB증권",
-      "subDate": "2026.12.10~2026.12.11",
-      "refundDate": "2026.12.15",
-      "listingDate": "미정",
-      "institutionalRatio": "0:1",
-      "lockupRatio": "0.00%",
-      "no": "2348",
-      "url": "https://www.38.co.kr/html/fund/?o=v&no=2348&l=&page=1"
     },
     {
       "name": "인터엑스",
